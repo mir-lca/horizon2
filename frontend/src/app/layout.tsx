@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar, DateRangeProvider, BusinessUnitProvider } from "@/components/layout/navbar";
 import { ThemeProvider } from "@/lib/theme-provider";
-import { FeedbackProvider } from "tr-workspace-components";
+// import { FeedbackProvider } from "tr-workspace-components"; // Temporarily disabled due to React.Children.only error
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,18 +32,12 @@ export default function RootLayout({
         <ThemeProvider defaultTheme="system" storageKey="horizon-theme">
           <BusinessUnitProvider>
             <DateRangeProvider>
-              <FeedbackProvider
-                useJira={true}
-                appLabel="Horizon"
-                storageKey="horizon-feedback"
-              >
-                <div className="flex flex-col min-h-screen">
-                  <Navbar />
-                  <main className="flex-1 flex flex-col min-h-0 overflow-auto md:overflow-hidden">
-                    {children}
-                  </main>
-                </div>
-              </FeedbackProvider>
+              <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <main className="flex-1 flex flex-col min-h-0 overflow-auto md:overflow-hidden">
+                  {children}
+                </main>
+              </div>
             </DateRangeProvider>
           </BusinessUnitProvider>
           <Toaster position="top-right" />

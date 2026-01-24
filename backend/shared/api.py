@@ -353,49 +353,68 @@ def initiative_detail(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def projects(req: func.HttpRequest) -> func.HttpResponse:
-    db, error = require_connection()
-    if error:
-        return error
+    try:
+        db, error = require_connection()
+        if error:
+            return error
 
-    if req.method == "GET":
-        try:
-            rows = db.fetch_all(
-                """
-                SELECT id::text,
-                       name,
-                       description,
-                       business_unit_id::text AS "businessUnitId",
-                       business_unit_name AS "businessUnitName",
-                       risk_level AS "riskLevel",
-                       start_year AS "startYear",
-                       start_quarter AS "startQuarter",
-                       duration_quarters AS "durationQuarters",
-                       minimum_duration_quarters AS "minimumDurationQuarters",
-                       resource_allocations AS "resourceAllocations",
-                       total_cost AS "totalCost",
-                       sm_cost_percentage AS "smCostPercentage",
-                       yearly_sustaining_cost AS "yearlySustainingCost",
-                       yearly_sustaining_costs AS "yearlySustainingCosts",
-                       gross_margin_percentage AS "grossMarginPercentage",
-                       gross_margin_percentages AS "grossMarginPercentages",
-                       revenue_estimates AS "revenueEstimates",
-                       status,
-                       visible,
-                       parent_project_id::text AS "parentProjectId",
-                       master_project_id::text AS "masterProjectId",
-                       financial_notes AS "financialNotes",
-                       maturity_level AS "maturityLevel",
-                       color,
-                       created_at AS "createdAt",
-                       updated_at AS "updatedAt"
-                FROM projects
-                ORDER BY name
-                """
-            )
-            return json_response(rows)
-        except Exception as e:
-            logger.error(f"Error fetching projects: {e}")
-            return json_response({"error": str(e)}, status_code=500)
+        if req.method == "GET":
+            try:
+                rows = db.fetch_all(
+                    """
+                    SELECT id::text,
+                           name,
+                           description,
+                           business_unit_id::text AS "businessUnitId",
+                           business_unit_name AS "businessUnitName",
+                           risk_level AS "riskLevel",
+                           start_year AS "startYear",
+                           start_quarter AS "startQuarter",
+                           duration_quarters AS "durationQuarters",
+                           minimum_duration_quarters AS "minimumDurationQuarters",
+                           resource_allocations AS "resourceAllocations",
+                           total_cost AS "totalCost",
+                           sm_cost_percentage AS "smCostPercentage",
+                           yearly_sustaining_cost AS "yearlySustainingCost",
+                           yearly_sustaining_costs AS "yearlySustainingCosts",
+                           gross_margin_percentage AS "grossMarginPercentage",
+                           gross_margin_percentages AS "grossMarginPercentages",
+                           revenue_estimates AS "revenueEstimates",
+                           status,
+                           visible,
+                           parent_project_id::text AS "parentProjectId",
+                           master_project_id::text AS "masterProjectId",
+                           financial_notes AS "financialNotes",
+                           maturity_level AS "maturityLevel",
+                           color,
+                           created_at AS "createdAt",
+                           updated_at AS "updatedAt"
+                    FROM projects
+                    ORDER BY name
+                    """
+                )
+                return json_response(rows)
+            except Exception as e:
+                import traceback
+                error_details = {
+                    "error": str(e),
+                    "type": type(e).__name__,
+                    "traceback": traceback.format_exc()
+                }
+                logger.error(f"Error fetching projects: {error_details}")
+                return json_response(error_details, status_code=500)
+    except Exception as outer_e:
+        import traceback
+        # Catch-all for any errors in error handling itself
+        return func.HttpResponse(
+            body=json.dumps({
+                "error": "Critical error in projects endpoint",
+                "details": str(outer_e),
+                "traceback": traceback.format_exc()
+            }),
+            status_code=500,
+            mimetype="application/json"
+        )
 
     payload = parse_json(req)
     if not payload or not payload.get("name"):
