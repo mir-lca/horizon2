@@ -353,12 +353,19 @@ def initiative_detail(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def projects(req: func.HttpRequest) -> func.HttpResponse:
+    # Temporary debug version
+    logger.info("projects() function called")
+    if req.method == "GET":
+        return json_response({"debug": "projects GET working", "timestamp": str(date.today())})
+    return json_response({"error": "Method not allowed"}, status_code=405)
+
+def projects_disabled(req: func.HttpRequest) -> func.HttpResponse:
     try:
         db, error = require_connection()
         if error:
             return error
 
-        if req.method == "GET":
+        if req.method == "GET (old version)":
             try:
                 rows = db.fetch_all(
                     """
