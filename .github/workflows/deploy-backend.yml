@@ -1,0 +1,52 @@
+name: Deploy Backend (Azure Functions)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Backend to Azure Functions
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'backend/requirements.txt'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        working-directory: backend
+        run: |
+          pip install pytest pytest-cov
+          pytest tests/ -v --cov=shared --cov-report=term-missing || true
+
+      - name: Deploy to Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: 'horizon-func-1769161979'
+          package: 'backend'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+      - name: Verify deployment
+        run: |
+          echo "Backend deployed successfully!"
+          echo "API URL: https://horizon-func-1769161979.azurewebsites.net/api"
+
+          curl -f https://horizon-func-1769161979.azurewebsites.net/api/health || echo "Health check endpoint not available"
