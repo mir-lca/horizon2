@@ -25,6 +25,11 @@
       "allowedRoles": ["anonymous", "authenticated"]
     },
     {
+      "route": "/api/*",
+      "rewrite": "https://horizon-func-1769161979.azurewebsites.net/api/{rest}",
+      "allowedRoles": ["authenticated"]
+    },
+    {
       "route": "/*",
       "allowedRoles": ["authenticated"]
     }
