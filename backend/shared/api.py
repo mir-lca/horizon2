@@ -403,9 +403,79 @@ def projects(req: func.HttpRequest) -> func.HttpResponse:
                 }
                 logger.error(f"Error fetching projects: {error_details}")
                 return json_response(error_details, status_code=500)
+
+        elif req.method == "POST":
+            payload = parse_json(req)
+            if not payload or not payload.get("name"):
+                return json_response({"error": "Project name is required"}, status_code=400)
+
+            project_id = uuid.uuid4()
+            db.execute(
+                """
+                INSERT INTO projects (
+                    id,
+                    name,
+                    description,
+                    business_unit_id,
+                    business_unit_name,
+                    risk_level,
+                    start_year,
+                    start_quarter,
+                    duration_quarters,
+                    minimum_duration_quarters,
+                    resource_allocations,
+                    total_cost,
+                    sm_cost_percentage,
+                    yearly_sustaining_cost,
+                    yearly_sustaining_costs,
+                    gross_margin_percentage,
+                    gross_margin_percentages,
+                    revenue_estimates,
+                    status,
+                    visible,
+                    parent_project_id,
+                    master_project_id,
+                    financial_notes,
+                    maturity_level,
+                    color
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    project_id,
+                    payload.get("name").strip(),
+                    payload.get("description"),
+                    parse_uuid(payload.get("businessUnitId")),
+                    payload.get("businessUnitName"),
+                    payload.get("riskLevel"),
+                    payload.get("startYear"),
+                    payload.get("startQuarter"),
+                    payload.get("durationQuarters"),
+                    payload.get("minimumDurationQuarters"),
+                    json_dumps(payload.get("resourceAllocations")) if payload.get("resourceAllocations") is not None else None,
+                    parse_decimal(payload.get("totalCost")),
+                    parse_decimal(payload.get("smCostPercentage")),
+                    parse_decimal(payload.get("yearlySustainingCost")),
+                    json_dumps(payload.get("yearlySustainingCosts")) if payload.get("yearlySustainingCosts") is not None else None,
+                    parse_decimal(payload.get("grossMarginPercentage")),
+                    json_dumps(payload.get("grossMarginPercentages")) if payload.get("grossMarginPercentages") is not None else None,
+                    json_dumps(payload.get("revenueEstimates")) if payload.get("revenueEstimates") is not None else None,
+                    payload.get("status", "unfunded"),
+                    parse_bool(payload.get("visible"), True),
+                    parse_uuid(payload.get("parentProjectId")),
+                    parse_uuid(payload.get("masterProjectId")),
+                    payload.get("financialNotes"),
+                    parse_decimal(payload.get("maturityLevel")),
+                    payload.get("color"),
+                ),
+            )
+            log_audit(db, "project", project_id, "create", get_actor(req), payload)
+            return json_response({"id": str(project_id)})
     except Exception as outer_e:
         import traceback
-        # Catch-all for any errors in error handling itself
         return func.HttpResponse(
             body=json.dumps({
                 "error": "Critical error in projects endpoint",
@@ -415,76 +485,6 @@ def projects(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             mimetype="application/json"
         )
-
-    payload = parse_json(req)
-    if not payload or not payload.get("name"):
-        return json_response({"error": "Project name is required"}, status_code=400)
-
-    project_id = uuid.uuid4()
-    db.execute(
-        """
-        INSERT INTO projects (
-            id,
-            name,
-            description,
-            business_unit_id,
-            business_unit_name,
-            risk_level,
-            start_year,
-            start_quarter,
-            duration_quarters,
-            minimum_duration_quarters,
-            resource_allocations,
-            total_cost,
-            sm_cost_percentage,
-            yearly_sustaining_cost,
-            yearly_sustaining_costs,
-            gross_margin_percentage,
-            gross_margin_percentages,
-            revenue_estimates,
-            status,
-            visible,
-            parent_project_id,
-            master_project_id,
-            financial_notes,
-            maturity_level,
-            color
-        ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s
-        )
-        """,
-        (
-            project_id,
-            payload.get("name").strip(),
-            payload.get("description"),
-            parse_uuid(payload.get("businessUnitId")),
-            payload.get("businessUnitName"),
-            payload.get("riskLevel"),
-            payload.get("startYear"),
-            payload.get("startQuarter"),
-            payload.get("durationQuarters"),
-            payload.get("minimumDurationQuarters"),
-            json_dumps(payload.get("resourceAllocations")) if payload.get("resourceAllocations") is not None else None,
-            parse_decimal(payload.get("totalCost")),
-            parse_decimal(payload.get("smCostPercentage")),
-            parse_decimal(payload.get("yearlySustainingCost")),
-            json_dumps(payload.get("yearlySustainingCosts")) if payload.get("yearlySustainingCosts") is not None else None,
-            parse_decimal(payload.get("grossMarginPercentage")),
-            json_dumps(payload.get("grossMarginPercentages")) if payload.get("grossMarginPercentages") is not None else None,
-            json_dumps(payload.get("revenueEstimates")) if payload.get("revenueEstimates") is not None else None,
-            payload.get("status", "unfunded"),
-            parse_bool(payload.get("visible"), True),
-            parse_uuid(payload.get("parentProjectId")),
-            parse_uuid(payload.get("masterProjectId")),
-            payload.get("financialNotes"),
-            parse_decimal(payload.get("maturityLevel")),
-            payload.get("color"),
-        ),
-    )
-    log_audit(db, "project", project_id, "create", get_actor(req), payload)
-    return json_response({"id": str(project_id)})
 
 
 def project_detail(req: func.HttpRequest) -> func.HttpResponse:
