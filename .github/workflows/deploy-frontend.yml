@@ -45,6 +45,8 @@ jobs:
 
       - name: Build application
         working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_BASE_URL: https://horizon-func-1769161979.azurewebsites.net/api
         run: npm run build
 
       - name: Deploy to Azure Static Web Apps
