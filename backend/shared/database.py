@@ -149,6 +149,24 @@ class Database:
                         continue
                     cur.execute(stmt + ";")
 
+                # CRITICAL MIGRATION: Add funded column if missing
+                # This fixes bytecode caching issue where old code expects this column
+                try:
+                    cur.execute("""
+                        SELECT column_name
+                        FROM information_schema.columns
+                        WHERE table_name = 'projects' AND column_name = 'funded'
+                    """)
+                    if not cur.fetchone():
+                        logger.info("MIGRATION: Adding funded column to projects table")
+                        cur.execute("ALTER TABLE projects ADD COLUMN funded BOOLEAN DEFAULT false")
+                        logger.info("MIGRATION: Successfully added funded column")
+                    else:
+                        logger.info("MIGRATION: funded column already exists, skipping")
+                except Exception as e:
+                    logger.error(f"MIGRATION ERROR: {e}")
+                    # Don't raise - allow app to continue even if migration fails
+
             conn.commit()
         self._schema_ready = True
 
