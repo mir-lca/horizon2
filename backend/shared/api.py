@@ -378,7 +378,6 @@ def projects(req: func.HttpRequest) -> func.HttpResponse:
                        revenue_estimates AS "revenueEstimates",
                        status,
                        visible,
-                       funded,
                        parent_project_id::text AS "parentProjectId",
                        master_project_id::text AS "masterProjectId",
                        financial_notes AS "financialNotes",
