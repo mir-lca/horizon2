@@ -37,12 +37,18 @@ jobs:
           pip install pytest pytest-cov
           pytest tests/ -v --cov=shared --cov-report=term-missing || true
 
-      - name: Deploy to Azure Functions
-        uses: Azure/functions-action@v1
-        with:
-          app-name: 'horizon-func-1769161979'
-          package: 'backend'
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+      - name: Install Azure Functions Core Tools
+        run: |
+          npm install -g azure-functions-core-tools@4 --unsafe-perm true
+
+      - name: Deploy to Azure Functions using Core Tools
+        working-directory: backend
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+        run: |
+          echo "$PUBLISH_PROFILE" > publish-profile.xml
+          func azure functionapp publish horizon-func-1769161979 --python --publish-profile publish-profile.xml
+          rm publish-profile.xml
 
       - name: Verify deployment
         run: |
