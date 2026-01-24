@@ -37,10 +37,12 @@ export default function RootLayout({
                 appLabel="Horizon"
                 storageKey="horizon-feedback"
               >
-                <Navbar />
-                <main className="flex-1 flex flex-col min-h-0 overflow-auto md:overflow-hidden">
-                  {children}
-                </main>
+                <>
+                  <Navbar />
+                  <main className="flex-1 flex flex-col min-h-0 overflow-auto md:overflow-hidden">
+                    {children}
+                  </main>
+                </>
               </FeedbackProvider>
             </DateRangeProvider>
           </BusinessUnitProvider>

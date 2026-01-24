@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS projects (
   revenue_estimates JSONB,
   status TEXT,
   visible BOOLEAN DEFAULT true,
+  funded BOOLEAN DEFAULT false,
   parent_project_id UUID,
   master_project_id UUID,
   financial_notes TEXT,
