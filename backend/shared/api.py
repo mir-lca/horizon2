@@ -355,41 +355,45 @@ def projects(req: func.HttpRequest) -> func.HttpResponse:
         return error
 
     if req.method == "GET":
-        rows = db.fetch_all(
-            """
-            SELECT id::text,
-                   name,
-                   description,
-                   business_unit_id::text AS "businessUnitId",
-                   business_unit_name AS "businessUnitName",
-                   risk_level AS "riskLevel",
-                   start_year AS "startYear",
-                   start_quarter AS "startQuarter",
-                   duration_quarters AS "durationQuarters",
-                   minimum_duration_quarters AS "minimumDurationQuarters",
-                   resource_allocations AS "resourceAllocations",
-                   total_cost AS "totalCost",
-                   sm_cost_percentage AS "smCostPercentage",
-                   yearly_sustaining_cost AS "yearlySustainingCost",
-                   yearly_sustaining_costs AS "yearlySustainingCosts",
-                   gross_margin_percentage AS "grossMarginPercentage",
-                   gross_margin_percentages AS "grossMarginPercentages",
-                   revenue_estimates AS "revenueEstimates",
-                   status,
-                   visible,
-                   funded,
-                   parent_project_id::text AS "parentProjectId",
-                   master_project_id::text AS "masterProjectId",
-                   financial_notes AS "financialNotes",
-                   maturity_level AS "maturityLevel",
-                   color,
-                   created_at AS "createdAt",
-                   updated_at AS "updatedAt"
-            FROM projects
-            ORDER BY name
-            """
-        )
-        return json_response(rows)
+        try:
+            rows = db.fetch_all(
+                """
+                SELECT id::text,
+                       name,
+                       description,
+                       business_unit_id::text AS "businessUnitId",
+                       business_unit_name AS "businessUnitName",
+                       risk_level AS "riskLevel",
+                       start_year AS "startYear",
+                       start_quarter AS "startQuarter",
+                       duration_quarters AS "durationQuarters",
+                       minimum_duration_quarters AS "minimumDurationQuarters",
+                       resource_allocations AS "resourceAllocations",
+                       total_cost AS "totalCost",
+                       sm_cost_percentage AS "smCostPercentage",
+                       yearly_sustaining_cost AS "yearlySustainingCost",
+                       yearly_sustaining_costs AS "yearlySustainingCosts",
+                       gross_margin_percentage AS "grossMarginPercentage",
+                       gross_margin_percentages AS "grossMarginPercentages",
+                       revenue_estimates AS "revenueEstimates",
+                       status,
+                       visible,
+                       funded,
+                       parent_project_id::text AS "parentProjectId",
+                       master_project_id::text AS "masterProjectId",
+                       financial_notes AS "financialNotes",
+                       maturity_level AS "maturityLevel",
+                       color,
+                       created_at AS "createdAt",
+                       updated_at AS "updatedAt"
+                FROM projects
+                ORDER BY name
+                """
+            )
+            return json_response(rows)
+        except Exception as e:
+            logger.error(f"Error fetching projects: {e}")
+            return json_response({"error": str(e)}, status_code=500)
 
     payload = parse_json(req)
     if not payload or not payload.get("name"):
