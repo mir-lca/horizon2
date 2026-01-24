@@ -122,7 +122,6 @@ CREATE TABLE IF NOT EXISTS projects (
   revenue_estimates JSONB,
   status TEXT,
   visible BOOLEAN DEFAULT true,
-  funded BOOLEAN DEFAULT false,
   parent_project_id UUID,
   master_project_id UUID,
   financial_notes TEXT,
@@ -149,24 +148,6 @@ class Database:
                     if not stmt:
                         continue
                     cur.execute(stmt + ";")
-
-                # Run migrations
-                try:
-                    # Check if funded column exists in projects table
-                    cur.execute("""
-                        SELECT column_name
-                        FROM information_schema.columns
-                        WHERE table_name = 'projects' AND column_name = 'funded'
-                    """)
-                    if not cur.fetchone():
-                        logger.info("Adding funded column to projects table")
-                        cur.execute("ALTER TABLE projects ADD COLUMN funded BOOLEAN DEFAULT false")
-                        logger.info("Successfully added funded column")
-                    else:
-                        logger.info("funded column already exists")
-                except Exception as e:
-                    logger.error(f"Migration error: {e}")
-                    raise
 
             conn.commit()
         self._schema_ready = True
