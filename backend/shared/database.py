@@ -149,6 +149,17 @@ class Database:
                     if not stmt:
                         continue
                     cur.execute(stmt + ";")
+
+                # Run migrations
+                # Check if funded column exists in projects table
+                cur.execute("""
+                    SELECT column_name
+                    FROM information_schema.columns
+                    WHERE table_name = 'projects' AND column_name = 'funded'
+                """)
+                if not cur.fetchone():
+                    cur.execute("ALTER TABLE projects ADD COLUMN funded BOOLEAN DEFAULT false")
+
             conn.commit()
         self._schema_ready = True
 
