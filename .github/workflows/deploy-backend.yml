@@ -37,18 +37,29 @@ jobs:
           pip install pytest pytest-cov
           pytest tests/ -v --cov=shared --cov-report=term-missing || true
 
-      - name: Install Azure Functions Core Tools
-        run: |
-          npm install -g azure-functions-core-tools@4 --unsafe-perm true
-
-      - name: Deploy to Azure Functions using Core Tools
+      - name: Create deployment package
         working-directory: backend
+        run: |
+          zip -r ../backend.zip . -x "*.pyc" -x "*__pycache__*" -x "*.git*" -x "tests/*"
+
+      - name: Deploy to Azure Functions via ZipDeploy
         env:
           PUBLISH_PROFILE: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
         run: |
+          # Extract credentials from publish profile
           echo "$PUBLISH_PROFILE" > publish-profile.xml
-          func azure functionapp publish horizon-func-1769161979 --python --publish-profile publish-profile.xml
+          USERNAME=$(grep -oPm1 "(?<=userName=\")[^\"]+(?=\")" publish-profile.xml)
+          PASSWORD=$(grep -oPm1 "(?<=userPWD=\")[^\"]+(?=\")" publish-profile.xml)
           rm publish-profile.xml
+
+          # Deploy using ZipDeploy API
+          curl -X POST \
+            -u "$USERNAME:$PASSWORD" \
+            --data-binary @backend.zip \
+            -H "Content-Type: application/zip" \
+            https://horizon-func-1769161979.scm.azurewebsites.net/api/zipdeploy?isAsync=false
+
+          rm backend.zip
 
       - name: Verify deployment
         run: |
