@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import uuid
 from decimal import Decimal
@@ -6,6 +7,8 @@ from json import dumps as json_dumps
 from datetime import date
 import azure.functions as func
 from .database import get_database
+
+logger = logging.getLogger(__name__)
 
 
 def json_response(payload, status_code=200):
