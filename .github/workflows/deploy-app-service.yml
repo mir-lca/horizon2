@@ -38,8 +38,10 @@ jobs:
         run: |
           mkdir -p deploy
           cp -r frontend/.next/standalone/* deploy/
+          mkdir -p deploy/.next
           cp -r frontend/.next/static deploy/.next/static
-          cp -r frontend/public deploy/public
+          mkdir -p deploy/public
+          cp -r frontend/public/* deploy/public/ || true
           cp server.js deploy/
           cd deploy && npm install --omit=dev
 
