@@ -45,8 +45,6 @@ jobs:
 
       - name: Build application
         working-directory: frontend
-        env:
-          NEXT_PUBLIC_API_BASE_URL: https://horizon-func-fresh.azurewebsites.net/api
         run: npm run build
 
       - name: Deploy to Azure Static Web Apps
@@ -57,8 +55,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: 'upload'
           app_location: 'frontend'
-          output_location: '.next'
-          api_location: ''
+          output_location: 'standalone'
           skip_app_build: true
 
       - name: Deployment summary
