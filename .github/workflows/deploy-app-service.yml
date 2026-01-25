@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'frontend/**'
-      - 'server.js'
       - '.github/workflows/deploy-app-service.yml'
   workflow_dispatch:
 
@@ -37,13 +36,14 @@ jobs:
       - name: Prepare deployment package
         run: |
           mkdir -p deploy
+          # Copy standalone server (includes built-in Next.js server)
           cp -r frontend/.next/standalone/* deploy/
-          mkdir -p deploy/.next
-          cp -r frontend/.next/static deploy/.next/static
-          mkdir -p deploy/public
-          cp -r frontend/public/* deploy/public/ || true
-          cp server.js deploy/
-          cd deploy && npm install --omit=dev
+          # Copy static assets
+          mkdir -p deploy/frontend/.next
+          cp -r frontend/.next/static deploy/frontend/.next/static
+          # Copy public folder
+          mkdir -p deploy/frontend/public
+          cp -r frontend/public/* deploy/frontend/public/ || true
 
       - name: Archive deployment package
         run: |
