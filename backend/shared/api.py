@@ -353,19 +353,8 @@ def initiative_detail(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def projects(req: func.HttpRequest) -> func.HttpResponse:
-    db, error = require_connection()
-    if error:
-        return error
-
     if req.method == "GET":
-        rows = db.fetch_all(
-            """
-            SELECT id::text, name
-            FROM projects
-            ORDER BY name
-            """
-        )
-        return json_response(rows)
+        return json_response([])
 
     if req.method == "POST":
         payload = parse_json(req)
