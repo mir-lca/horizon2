@@ -352,7 +352,7 @@ def initiative_detail(req: func.HttpRequest) -> func.HttpResponse:
     return json_response({"status": "updated"})
 
 
-def projects(req: func.HttpRequest) -> func.HttpResponse:
+def project_list_handler(req: func.HttpRequest) -> func.HttpResponse:
     if req.method == "GET":
         return json_response([])
 
