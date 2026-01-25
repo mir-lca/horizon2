@@ -1,0 +1,61 @@
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - 'server.js'
+      - '.github/workflows/deploy-app-service.yml'
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    name: Build and Deploy to App Service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Next.js application
+        working-directory: frontend
+        run: npm run build
+
+      - name: Prepare deployment package
+        run: |
+          mkdir -p deploy
+          cp -r frontend/.next/standalone/* deploy/
+          cp -r frontend/.next/static deploy/.next/static
+          cp -r frontend/public deploy/public
+          cp server.js deploy/
+          cd deploy && npm install --omit=dev
+
+      - name: Archive deployment package
+        run: |
+          cd deploy
+          zip -r ../deploy.zip .
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: horizon-portfolio-app
+          publish-profile: ${{ secrets.AZURE_APP_SERVICE_PUBLISH_PROFILE }}
+          package: deploy.zip
+
+      - name: Deployment summary
+        run: |
+          echo "Application deployed successfully!"
+          echo "URL: https://horizon-portfolio-app.azurewebsites.net"
