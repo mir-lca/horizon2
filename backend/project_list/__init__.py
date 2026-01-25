@@ -1,6 +1,6 @@
 import azure.functions as func
-from shared.api import projects
+from shared.api import project_list_handler
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    return projects(req)
+    return project_list_handler(req)
