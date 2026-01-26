@@ -1,4 +1,4 @@
-name: Deploy to Azure App Service
+name: Deploy to Azure App Service (Fixed)
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'frontend/**'
-      - '.github/workflows/deploy-app-service.yml'
+      - '.github/workflows/deploy-app-service-fixed.yml'
   workflow_dispatch:
 
 jobs:
@@ -32,18 +32,43 @@ jobs:
       - name: Build Next.js application
         working-directory: frontend
         run: npm run build
+        env:
+          # Ensure standalone mode is active
+          NEXT_TELEMETRY_DISABLED: 1
 
-      - name: Prepare deployment package
+      - name: Prepare deployment package (Correct Standalone Structure)
         run: |
-          mkdir -p deploy
-          # Copy standalone server (includes built-in Next.js server)
-          cp -r frontend/.next/standalone/* deploy/
-          # Copy static assets
-          mkdir -p deploy/frontend/.next
-          cp -r frontend/.next/static deploy/frontend/.next/static
-          # Copy public folder
-          mkdir -p deploy/frontend/public
-          cp -r frontend/public/* deploy/frontend/public/ || true
+          # The standalone build already has the correct structure
+          # Just copy it as-is with static assets in the right place
+
+          # Copy the entire standalone directory
+          cp -r frontend/.next/standalone ./deploy
+
+          # Copy static assets to where standalone expects them
+          mkdir -p deploy/.next/static
+          cp -r frontend/.next/static/* deploy/.next/static/
+
+          # Copy public folder to where standalone expects it
+          mkdir -p deploy/public
+          if [ -d "frontend/public" ]; then
+            cp -r frontend/public/* deploy/public/ || true
+          fi
+
+          # Verify structure
+          echo "Deployment structure:"
+          ls -la deploy/
+          echo "Static assets:"
+          ls -la deploy/.next/static/ | head -10
+
+      - name: Create startup script
+        run: |
+          # Create a startup script for Azure App Service
+          cat > deploy/startup.sh << 'EOF'
+          #!/bin/bash
+          cd /home/site/wwwroot
+          node server.js
+          EOF
+          chmod +x deploy/startup.sh
 
       - name: Archive deployment package
         run: |
@@ -61,3 +86,8 @@ jobs:
         run: |
           echo "Application deployed successfully!"
           echo "URL: https://horizon-portfolio-app.azurewebsites.net"
+          echo ""
+          echo "Next steps:"
+          echo "1. Configure DATABASE_URL in App Service settings"
+          echo "2. Verify startup command: startup.sh"
+          echo "3. Check logs at: https://horizon-portfolio-app.scm.azurewebsites.net/api/logs/docker"
