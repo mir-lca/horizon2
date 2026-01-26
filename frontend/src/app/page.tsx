@@ -93,14 +93,7 @@ const GanttPanelContent = ({
   </Card>
 );
 
-let renderCount = 0;
-
 export default function Dashboard() {
-  renderCount++;
-  if (renderCount % 100 === 0) {
-    console.warn(`[Dashboard] Rendered ${renderCount} times - possible render loop!`);
-  }
-
   const dateRange = useAppStore((state) => state.dateRange);
   const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
 

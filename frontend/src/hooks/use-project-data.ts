@@ -15,7 +15,6 @@ import {
 } from "@/lib/queries";
 import { Project, Resource, BusinessUnit, Competence } from "@/lib/types";
 import { ProjectUtils } from "@/lib/project-utils";
-import { useDatabaseRefresh } from "./use-database-refresh";
 
 export function useProjectData() {
   const queryClient = useQueryClient();
@@ -86,8 +85,6 @@ export function useProjectData() {
     await deleteProjectMutation.mutateAsync(id);
     return true;
   };
-
-  useDatabaseRefresh(refetchAll);
 
   return {
     projects,

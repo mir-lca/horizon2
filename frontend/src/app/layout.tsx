@@ -7,8 +7,6 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { QueryProvider } from "@/lib/query-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { DebugLogger } from "@/components/debug-logger";
-// import { FeedbackProvider } from "tr-workspace-components"; // Temporarily disabled due to React.Children.only error
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +35,6 @@ export default function RootLayout({
           <QueryProvider>
             <ThemeProvider defaultTheme="system" storageKey="horizon-theme">
               <div className="contents">
-                <DebugLogger />
                 <ProgressBar />
                 <div className="flex flex-col min-h-screen">
                   <Navbar />

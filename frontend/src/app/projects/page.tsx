@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "tr-workspace-components";
 import { Project, BusinessUnit, RiskFactor } from "@/lib/types";
 import { useProjectSortConfig, useProjectFilterState, useLocalStorage } from "@/lib/storage-utils";
-import { useDatabaseRefresh } from "@/hooks/use-database-refresh";
 import { useProjectData } from "@/hooks/use-project-data";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorMessage } from "@/components/ui/error-message";
@@ -49,8 +48,6 @@ export default function ProjectsPage() {
     createProject,
     refetchAll,
   } = useProjectData();
-
-  useDatabaseRefresh(refetchAll);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showChildProjects, setShowChildProjects] = useLocalStorage<{ [key: string]: boolean }>("projects_expanded_state", {});

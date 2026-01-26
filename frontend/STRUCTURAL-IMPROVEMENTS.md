@@ -1,6 +1,6 @@
 # Horizon Frontend Structural Improvements
 
-## Status: 6 of 10 Complete ✅
+## Status: 7 of 11 Complete ✅
 
 Date Started: 2026-01-25
 Last Updated: 2026-01-26
@@ -158,6 +158,13 @@ Last Updated: 2026-01-26
 - Updated: `src/app/globals.css` (nprogress custom styles)
 - Updated: `package.json` (added nprogress dependencies)
 
+**Bugs Fixed**:
+- Fixed infinite render loop (244,550+ renders) by replacing useEffect+useState with useMemo pattern
+- Fixed Zod validation for `smCostPercentage` (string → number coercion)
+- Fixed React.Children.only error in ThemeProvider with contents wrapper
+- Removed automatic database refresh (React Query handles this better)
+- Removed all debug logging code
+
 **Benefits**:
 - Visual feedback during all route transitions
 - Consistent loading UI across the app
@@ -165,12 +172,37 @@ Last Updated: 2026-01-26
 - Skeleton screens match actual UI layout
 - No more white screen during navigation
 - Coordinated loading states prevent race conditions
+- Stable render cycles (no infinite loops)
+
+---
+
+### 7. ✅ Database Refresh Hook Removal
+**Status**: Complete (Removed)
+**Completed**: 2026-01-26
+
+**Problem**:
+- Automatic refresh triggered too frequently
+- Contributed to perceived "reload on tab switch" behavior
+- React Query already handles refresh automatically
+
+**What was done**:
+- Removed `use-database-refresh.ts` hook entirely
+- Removed all imports and usages from components
+- React Query's automatic refetch and stale-time management is sufficient
+- No need for custom refresh logic
+
+**Files modified**:
+- Deleted: `src/hooks/use-database-refresh.ts`
+- Updated: `src/hooks/use-project-data.ts` (removed import and usage)
+- Updated: `src/app/projects/page.tsx` (removed import and usage)
+
+**Benefits**: Simpler codebase, React Query handles everything automatically
 
 ---
 
 ## Remaining Improvements 🔄
 
-### 7. 🔄 Eliminate Props Drilling
+### 8. 🔄 Eliminate Props Drilling
 **Status**: Not Started
 **Priority**: MEDIUM - Code Quality
 
@@ -196,7 +228,7 @@ Last Updated: 2026-01-26
 
 ---
 
-### 8. 🔄 Add Comprehensive Data Validation Layer
+### 9. 🔄 Add Comprehensive Data Validation Layer
 **Status**: Not Started
 **Priority**: MEDIUM - Robustness
 
@@ -222,7 +254,7 @@ Last Updated: 2026-01-26
 
 ---
 
-### 9. 🔄 Reorganize Component Structure
+### 10. 🔄 Reorganize Component Structure
 **Status**: Not Started
 **Priority**: MEDIUM - Code Quality
 
@@ -252,32 +284,6 @@ Last Updated: 2026-01-26
 - Update all imports across the app
 
 **Benefits**: Easier navigation, better reusability, clearer architecture
-
----
-
-### 10. 🔄 Fix Database Refresh Hook with Debouncing
-**Status**: Not Started
-**Priority**: LOW - Performance
-
-**Problem**:
-- Automatic refresh triggers too frequently
-- No debouncing on rapid updates
-- Users have no control over when refresh happens
-- No visual feedback during refresh
-
-**Proposed Solution**:
-1. Add 5-second debouncing to refresh operations
-2. Make refresh opt-in with manual trigger button
-3. Add visual indicator (spinner, toast) when refreshing
-4. Use React Query's `refetch` method instead of custom refresh
-5. Add refresh timestamp to UI
-
-**Files to modify**:
-- `src/hooks/use-project-data.ts` - Add debouncing
-- `src/components/layout/navbar.tsx` - Add manual refresh button
-- Remove automatic refresh triggers
-
-**Benefits**: Better performance, user control, less database load
 
 ---
 
@@ -314,16 +320,16 @@ Last Updated: 2026-01-26
 
 ## Implementation Order Recommendation
 
-**Phase 1 - Immediate User Impact** (Week 1):
-1. #6 - Implement coordinated loading states
+**Phase 1 - Foundation** ✅ Complete:
+1. ✅ #1-6 - Core infrastructure (React Query, Zustand, Zod, Error Boundaries, PostgreSQL, Loading States)
+2. ✅ #7 - Database refresh hook (removed, React Query handles this)
 
-**Phase 2 - Code Quality** (Week 2):
-2. #7 - Eliminate props drilling
-3. #9 - Reorganize component structure
+**Phase 2 - Code Quality** (Next):
+3. #8 - Eliminate props drilling
+4. #10 - Reorganize component structure
 
-**Phase 3 - Robustness** (Week 3):
-4. #8 - Add comprehensive data validation
-5. #10 - Fix database refresh hook
+**Phase 3 - Robustness** (Future):
+5. #9 - Add comprehensive data validation
 6. #11 - Add API response type safety
 
 ---
@@ -344,10 +350,20 @@ Last Updated: 2026-01-26
 
 ## Notes
 
-- All completed improvements are deployed and working in production
+**Phase 1 Complete**:
+- All foundation improvements deployed and working in production
 - Database connection issues resolved with 30s timeout
-- Zod validation errors fixed with nullable field support
-- React.Children.only error resolved with fragment wrapper
-- Application is stable and performant
+- Infinite render loop fixed (useMemo pattern)
+- Zod validation for `smCostPercentage` fixed with type coercion
+- React.Children.only error resolved with contents wrapper
+- Database refresh hook removed (React Query handles automatically)
+- All debug logging cleaned up
+- Application is stable and performant with no render loops
 
-**Next Review**: After completing Phase 1 (coordinated loading states)
+**Technical Debt Cleaned**:
+- Removed `debug-logger.tsx` component
+- Removed render count tracking from Dashboard
+- Removed `use-database-refresh.ts` hook and all usages
+- Cleaned up unnecessary imports and code
+
+**Next Review**: After completing Phase 2 (code quality improvements)
