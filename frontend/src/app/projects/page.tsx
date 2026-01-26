@@ -22,11 +22,11 @@ import {
   MeasuringStrategy,
 } from "@dnd-kit/core";
 import { GripVertical, ArrowUpDown } from "lucide-react";
-import { SearchBar, SearchSuggestion } from "@/components/ui/SearchBar";
-import { ProjectRow } from "@/components/ui/project-row";
-import { ProjectEditDialog } from "@/components/ui/project-edit-dialog";
+import { SearchBar, SearchSuggestion } from "@/components/features/SearchBar";
+import { ProjectRow } from "@/components/features/project-row";
+import { ProjectEditDialog } from "@/components/forms/project-edit-dialog";
 import { DropZone } from "@/components/ui/draggable-row";
-import { FilterPanel, FilterState } from "@/components/ui/filter-panel";
+import { FilterPanel, FilterState } from "@/components/features/filter-panel";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "tr-workspace-components";
 import { calculateIRRForProjects } from "@/lib/financial-calculations";
 import { useAppStore } from "@/store/app-store";

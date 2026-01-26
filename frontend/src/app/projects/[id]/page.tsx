@@ -8,11 +8,11 @@ import { Project, RevenueEstimate, YearlyFinancialMetric } from "@/lib/types";
 import { useProjectById } from "@/hooks/use-project-data";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { ProjectEditDialog } from "@/components/ui/project-edit-dialog";
-import { FinancialChart } from "@/components/ui/financial-chart";
-import { ProjectFinancialGrid } from "@/components/ui/ProjectFinancialGrid";
-import { ProjectDescriptionCard } from "@/components/ui/ProjectDescriptionCard";
-import { ProjectResourceAllocationManager } from "@/components/projects/financials/project-resource-allocation-manager";
+import { ProjectEditDialog } from "@/components/forms/project-edit-dialog";
+import { FinancialChart } from "@/components/features/financial-chart";
+import { ProjectFinancialGrid } from "@/components/features/ProjectFinancialGrid";
+import { ProjectDescriptionCard } from "@/components/features/ProjectDescriptionCard";
+import { ProjectResourceAllocationManager } from "@/components/forms/project-resource-allocation-manager";
 
 export default function ProjectDetailPage() {
   const router = useRouter();

@@ -12,7 +12,7 @@ import { FinancialRangeCard, PercentageMetricCard, FinancialMetricCard } from "@
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { useAppStore } from "@/store/app-store";
-import { BusinessUnitGapAnalysis } from "@/components/resource-gap";
+import { BusinessUnitGapAnalysis } from "@/components/features/business-unit-gap-analysis";
 import { useResourceGapAnalysis } from "@/hooks/use-resource-gap-analysis";
 import { SCROLL_AREA_CLASSES } from "@/lib/ui-shared-styles";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -29,7 +29,7 @@ import {
   createAggregateProject,
   calculatePortfolioHiringInvestment,
 } from "@/lib/financial-calculations";
-import { FinancialChart } from "@/components/ui/financial-chart";
+import { FinancialChart } from "@/components/features/financial-chart";
 import useMediaQuery from "@/hooks/use-media-query";
 import { Switch } from "tr-workspace-components";
 import { Label } from "tr-workspace-components";
@@ -51,7 +51,7 @@ interface ProjectGanttPanelProps {
 }
 
 const InteractiveGanttPanel = dynamic(
-  () => import("@/components/ui/interactive-gantt-panel").then((mod) => ({ default: mod.InteractiveGanttPanel })),
+  () => import("@/components/features/interactive-gantt-panel").then((mod) => ({ default: mod.InteractiveGanttPanel })),
   {
     ssr: false,
     loading: () => <LoadingState message="Loading Gantt chart..." />,
