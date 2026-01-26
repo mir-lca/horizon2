@@ -117,8 +117,16 @@ export function useUpsertProject() {
       });
       toast.success("Project updated successfully");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to update project: ${error.message}`);
+    onError: (error: any) => {
+      // Handle structured validation errors from server
+      if (error.response?.data?.validationErrors) {
+        const validationErrors = error.response.data.validationErrors;
+        validationErrors.forEach((err: { field: string; message: string }) => {
+          toast.error(`${err.field}: ${err.message}`);
+        });
+      } else {
+        toast.error(`Failed to update project: ${error.message || 'Unknown error'}`);
+      }
     },
   });
 }
@@ -135,8 +143,16 @@ export function useDeleteProject() {
       );
       toast.success("Project deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete project: ${error.message}`);
+    onError: (error: any) => {
+      // Handle structured validation errors from server
+      if (error.response?.data?.validationErrors) {
+        const validationErrors = error.response.data.validationErrors;
+        validationErrors.forEach((err: { field: string; message: string }) => {
+          toast.error(`${err.field}: ${err.message}`);
+        });
+      } else {
+        toast.error(`Failed to delete project: ${error.message || 'Unknown error'}`);
+      }
     },
   });
 }

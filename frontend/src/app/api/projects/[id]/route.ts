@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, execute } from '@/lib/db';
+import { ProjectSchema } from '@/lib/schemas';
+import { validateRequest } from '@/lib/api-validation';
 
 export async function GET(
   request: NextRequest,
@@ -64,6 +66,18 @@ export async function PUT(
     const { id } = await params;
     const payload = await request.json();
 
+    // Validate request body against schema
+    const validation = await validateRequest(ProjectSchema, {
+      ...payload,
+      id, // Ensure ID matches route param
+    });
+
+    if (!validation.success) {
+      return validation.error;
+    }
+
+    const validatedData = validation.data;
+
     await execute(
       `UPDATE projects SET
         name = $2,
@@ -94,30 +108,30 @@ export async function PUT(
       WHERE id = $1`,
       [
         id,
-        payload.name,
-        payload.description,
-        payload.businessUnitId,
-        payload.businessUnitName,
-        payload.riskLevel,
-        payload.startYear,
-        payload.startQuarter,
-        payload.durationQuarters,
-        payload.minimumDurationQuarters,
-        JSON.stringify(payload.resourceAllocations || []),
-        payload.totalCost,
-        payload.smCostPercentage,
-        payload.yearlySustainingCost,
-        JSON.stringify(payload.yearlySustainingCosts || []),
-        payload.grossMarginPercentage,
-        JSON.stringify(payload.grossMarginPercentages || []),
-        JSON.stringify(payload.revenueEstimates || []),
-        payload.status,
-        payload.visible !== undefined ? payload.visible : true,
-        payload.parentProjectId,
-        payload.masterProjectId,
-        payload.financialNotes,
-        payload.maturityLevel,
-        payload.color,
+        validatedData.name,
+        validatedData.description,
+        validatedData.businessUnitId,
+        validatedData.businessUnitName,
+        validatedData.riskLevel,
+        validatedData.startYear,
+        validatedData.startQuarter,
+        validatedData.durationQuarters,
+        validatedData.minimumDurationQuarters,
+        JSON.stringify(validatedData.resourceAllocations || []),
+        validatedData.totalCost,
+        validatedData.smCostPercentage,
+        validatedData.yearlySustainingCost,
+        JSON.stringify(validatedData.yearlySustainingCosts || []),
+        validatedData.grossMarginPercentage,
+        JSON.stringify(validatedData.grossMarginPercentages || []),
+        JSON.stringify(validatedData.revenueEstimates || []),
+        validatedData.status,
+        validatedData.visible !== undefined ? validatedData.visible : true,
+        validatedData.parentProjectId,
+        validatedData.masterProjectId,
+        validatedData.financialNotes,
+        validatedData.maturityLevel,
+        validatedData.color,
       ]
     );
 

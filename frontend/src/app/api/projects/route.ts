@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, execute } from '@/lib/db';
 import { randomUUID } from 'crypto';
+import { ProjectSchema } from '@/lib/schemas';
+import { validateRequest } from '@/lib/api-validation';
 
 export async function GET() {
   try {
@@ -49,15 +51,19 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.json();
+    const projectId = randomUUID();
 
-    if (!payload.name) {
-      return NextResponse.json(
-        { error: 'Project name is required' },
-        { status: 400 }
-      );
+    // Validate request body against schema
+    const validation = await validateRequest(ProjectSchema, {
+      ...payload,
+      id: projectId, // Add generated ID for validation
+    });
+
+    if (!validation.success) {
+      return validation.error;
     }
 
-    const projectId = randomUUID();
+    const validatedData = validation.data;
 
     await execute(
       `
@@ -95,30 +101,30 @@ export async function POST(request: NextRequest) {
       `,
       [
         projectId,
-        payload.name.trim(),
-        payload.description || null,
-        payload.businessUnitId || null,
-        payload.businessUnitName || null,
-        payload.riskLevel || null,
-        payload.startYear || null,
-        payload.startQuarter || null,
-        payload.durationQuarters || null,
-        payload.minimumDurationQuarters || null,
-        payload.resourceAllocations ? JSON.stringify(payload.resourceAllocations) : null,
-        payload.totalCost || null,
-        payload.smCostPercentage || null,
-        payload.yearlySustainingCost || null,
-        payload.yearlySustainingCosts ? JSON.stringify(payload.yearlySustainingCosts) : null,
-        payload.grossMarginPercentage || null,
-        payload.grossMarginPercentages ? JSON.stringify(payload.grossMarginPercentages) : null,
-        payload.revenueEstimates ? JSON.stringify(payload.revenueEstimates) : null,
-        payload.status || 'unfunded',
-        payload.visible !== undefined ? payload.visible : true,
-        payload.parentProjectId || null,
-        payload.masterProjectId || null,
-        payload.financialNotes || null,
-        payload.maturityLevel || null,
-        payload.color || null,
+        validatedData.name.trim(),
+        validatedData.description || null,
+        validatedData.businessUnitId || null,
+        validatedData.businessUnitName || null,
+        validatedData.riskLevel,
+        validatedData.startYear,
+        validatedData.startQuarter,
+        validatedData.durationQuarters,
+        validatedData.minimumDurationQuarters || null,
+        validatedData.resourceAllocations ? JSON.stringify(validatedData.resourceAllocations) : null,
+        validatedData.totalCost || null,
+        validatedData.smCostPercentage || null,
+        validatedData.yearlySustainingCost || null,
+        validatedData.yearlySustainingCosts ? JSON.stringify(validatedData.yearlySustainingCosts) : null,
+        validatedData.grossMarginPercentage || null,
+        validatedData.grossMarginPercentages ? JSON.stringify(validatedData.grossMarginPercentages) : null,
+        validatedData.revenueEstimates ? JSON.stringify(validatedData.revenueEstimates) : null,
+        validatedData.status,
+        validatedData.visible !== undefined ? validatedData.visible : true,
+        validatedData.parentProjectId || null,
+        validatedData.masterProjectId || null,
+        validatedData.financialNotes || null,
+        validatedData.maturityLevel || null,
+        validatedData.color || null,
       ]
     );
 
