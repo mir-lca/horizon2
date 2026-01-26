@@ -106,7 +106,10 @@ export const ProjectSchema = z.object({
   // Normalized as array only
   resourceAllocations: z.array(ResourceAllocationItemSchema).nullable().optional(),
   totalCost: z.number().nullable().optional(),
-  smCostPercentage: z.number().nullable().optional(),
+  // Can be string or number from database, coerce to number
+  smCostPercentage: z.union([z.string(), z.number()]).transform((val) =>
+    typeof val === 'string' ? parseFloat(val) : val
+  ).nullable().optional(),
   yearlySustainingCost: z.number().nullable().optional(),
   // Normalized as array only
   yearlySustainingCosts: z.array(YearlyFinancialMetricSchema).nullable().optional(),

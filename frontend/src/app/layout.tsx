@@ -36,7 +36,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <QueryProvider>
             <ThemeProvider defaultTheme="system" storageKey="horizon-theme">
-              <>
+              <div className="contents">
                 <DebugLogger />
                 <ProgressBar />
                 <div className="flex flex-col min-h-screen">
@@ -46,7 +46,7 @@ export default function RootLayout({
                   </main>
                 </div>
                 <Toaster position="top-right" />
-              </>
+              </div>
             </ThemeProvider>
           </QueryProvider>
         </ErrorBoundary>
