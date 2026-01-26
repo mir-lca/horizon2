@@ -34,13 +34,15 @@ export default function RootLayout({
         <ErrorBoundary>
           <QueryProvider>
             <ThemeProvider defaultTheme="system" storageKey="horizon-theme">
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-1 flex flex-col min-h-0 overflow-auto md:overflow-hidden">
-                  {children}
-                </main>
-              </div>
-              <Toaster position="top-right" />
+              <>
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-1 flex flex-col min-h-0 overflow-auto md:overflow-hidden">
+                    {children}
+                  </main>
+                </div>
+                <Toaster position="top-right" />
+              </>
             </ThemeProvider>
           </QueryProvider>
         </ErrorBoundary>
