@@ -17,6 +17,13 @@ module.exports = {
       },
     },
     extend: {
+      spacing: {
+        'xs': 'var(--space-xs)',
+        'sm': 'var(--space-sm)',
+        'md': 'var(--space-md)',
+        'lg': 'var(--space-lg)',
+        'xl': 'var(--space-xl)',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -88,9 +95,11 @@ module.exports = {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        'sm': 'var(--radius-sm)',
+        'md': 'var(--radius-md)',
+        'lg': 'var(--radius-lg)',
+        // Legacy radius support (keep for backward compatibility)
+        DEFAULT: "var(--radius)",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

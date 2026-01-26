@@ -1,5 +1,4 @@
 import React from "react";
-import { Card, CardContent } from "tr-workspace-components";
 import { cn } from "@/lib/utils";
 import { formatCurrencyInMillions } from "@/lib/formatting-utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "tr-workspace-components";
@@ -64,37 +63,35 @@ export function MetricCard({
 
   const getValueColor = () => {
     if (value === undefined || value === null || value === "" || value === 0) {
-      return "text-gray-400";
+      return "muted";
     }
     if (isHighlighted) {
-      return "text-blue-700 dark:text-blue-300";
+      return "highlighted";
     }
     if (formatAsPercentage) {
-      return "text-purple-600";
+      return "highlighted";
     }
-    return "text-foreground";
+    return "";
   };
 
   const cardContent = (
-    <Card
+    <div
       className={cn(
-        "overflow-hidden transition-colors duration-200",
-        onClick && "cursor-pointer hover:bg-accent/50",
+        "metric-card",
+        onClick && "clickable",
         className
       )}
       onClick={onClick}
     >
-      <CardContent className="p-3 space-y-1">
-        <div className="flex items-center gap-2">
-          {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
-          <p className="text-xs font-medium text-muted-foreground">{title}</p>
-        </div>
+      <div className="flex items-center gap-2">
+        {Icon && <Icon className="metric-icon" />}
+        <p className="metric-label">{title}</p>
+      </div>
 
-        <div className={cn("text-lg font-bold", getValueColor(), valueClassName)}>{formatValue()}</div>
+      <div className={cn("metric-value", getValueColor(), valueClassName)}>{formatValue()}</div>
 
-        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-      </CardContent>
-    </Card>
+      {subtitle && <p className="metric-subtitle">{subtitle}</p>}
+    </div>
   );
 
   if (tooltip) {

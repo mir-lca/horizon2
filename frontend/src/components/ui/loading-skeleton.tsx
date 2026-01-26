@@ -205,3 +205,65 @@ export function ProjectsPageSkeleton() {
     </div>
   );
 }
+
+/**
+ * CSS-Based Loading Skeletons (Reference App Pattern)
+ * Uses CSS animations from components.css for consistent shimmer effect
+ */
+interface LoadingSkeletonProps {
+  variant: "card" | "table" | "chart";
+  count?: number;
+  className?: string;
+}
+
+export function LoadingSkeleton({ variant, count = 1, className }: LoadingSkeletonProps) {
+  if (variant === "card") {
+    return (
+      <div className={cn("grid gap-4", className)}>
+        {Array.from({ length: count }).map((_, index) => (
+          <div key={index} className="skeleton-card" />
+        ))}
+      </div>
+    );
+  }
+
+  if (variant === "table") {
+    return (
+      <div className={cn("skeleton-table", className)}>
+        <div className="table-skeleton">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className={cn("skeleton-line", index % 2 === 0 && "wide")} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "chart") {
+    return <div className={cn("skeleton-chart", className)} />;
+  }
+
+  return null;
+}
+
+/**
+ * Skeleton Grid Component
+ * Displays grid of skeleton cards (for dashboard metrics)
+ */
+interface SkeletonGridProps {
+  count?: number;
+  columns?: 2 | 3 | 4;
+  className?: string;
+}
+
+export function SkeletonGrid({ count = 4, columns = 2, className }: SkeletonGridProps) {
+  const gridClass = columns === 2 ? "grid-cols-2" : columns === 3 ? "grid-cols-3" : "grid-cols-4";
+
+  return (
+    <div className={cn("grid gap-4", gridClass, className)}>
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="skeleton-card" />
+      ))}
+    </div>
+  );
+}
