@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'frontend/**'
-      - '.github/workflows/deploy-app-service-fixed.yml'
+      - '.github/workflows/deploy-app-service.yml'
   workflow_dispatch:
 
 jobs:
