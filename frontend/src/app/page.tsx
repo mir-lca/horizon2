@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { FinancialRangeCard, PercentageMetricCard, FinancialMetricCard } from "@/components/ui/metric-card";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { useDateRange, useBusinessUnit } from "@/components/layout/navbar";
+import { useAppStore } from "@/store/app-store";
 import { BusinessUnitGapAnalysis } from "@/components/resource-gap";
 import { useResourceGapAnalysis } from "@/hooks/use-resource-gap-analysis";
 import { SCROLL_AREA_CLASSES } from "@/lib/ui-shared-styles";
@@ -101,8 +101,8 @@ const GanttPanelContent = ({
 );
 
 export default function Dashboard() {
-  const { dateRange } = useDateRange();
-  const { selectedBusinessUnit } = useBusinessUnit();
+  const dateRange = useAppStore((state) => state.dateRange);
+  const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
 
   const { projects: fetchedProjects, resources, businessUnits, competences, loading: isLoading, error: dataError, updateProject } =
     useProjectData();

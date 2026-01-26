@@ -3,50 +3,38 @@
  */
 
 import { useMemo } from "react";
-import { useCachedCosmosData } from "@/lib/use-cosmos-cache";
-import { ContainerTypes } from "@/lib/cosmos-config";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  useProjects,
+  useResources,
+  useBusinessUnits,
+  useCompetences,
+  useUpsertProject,
+  useDeleteProject,
+  queryKeys,
+} from "@/lib/queries";
 import { Project, Resource, BusinessUnit, Competence } from "@/lib/types";
 import { ProjectUtils } from "@/lib/project-utils";
 import { useDatabaseRefresh } from "./use-database-refresh";
 
 export function useProjectData() {
-  const {
-    data: projects = [],
-    loading: projectsLoading,
-    error: projectsError,
-    refreshData: refetchProjects,
-    updateItem: upsertProject,
-    deleteItem: removeProject,
-  } = useCachedCosmosData<Project>(ContainerTypes.PROJECTS);
+  const queryClient = useQueryClient();
 
-  const {
-    data: resources = [],
-    loading: resourcesLoading,
-    error: resourcesError,
-    refreshData: refetchResources,
-  } = useCachedCosmosData<Resource>(ContainerTypes.RESOURCES);
+  const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useProjects();
+  const { data: resources = [], isLoading: resourcesLoading, error: resourcesError } = useResources();
+  const { data: businessUnits = [], isLoading: businessUnitsLoading, error: businessUnitsError } = useBusinessUnits();
+  const { data: competences = [], isLoading: competencesLoading, error: competencesError } = useCompetences();
 
-  const {
-    data: businessUnits = [],
-    loading: businessUnitsLoading,
-    error: businessUnitsError,
-    refreshData: refetchBusinessUnits,
-  } = useCachedCosmosData<BusinessUnit>(ContainerTypes.BUSINESS_UNITS);
-
-  const {
-    data: competences = [],
-    loading: competencesLoading,
-    error: competencesError,
-    refreshData: refetchCompetences,
-  } = useCachedCosmosData<Competence>(ContainerTypes.COMPETENCES);
+  const upsertProjectMutation = useUpsertProject();
+  const deleteProjectMutation = useDeleteProject();
 
   const loading = projectsLoading || resourcesLoading || businessUnitsLoading || competencesLoading;
   const error = projectsError || resourcesError || businessUnitsError || competencesError;
 
   const lookupMaps = useMemo(() => {
-    const businessUnitsMap = new Map(businessUnits.map((bu) => [bu.id, bu]));
-    const resourcesMap = new Map(resources.map((r) => [r.id, r]));
-    const competencesMap = new Map(competences.map((c) => [c.id, c]));
+    const businessUnitsMap = new Map(businessUnits.map((bu: BusinessUnit) => [bu.id, bu]));
+    const resourcesMap = new Map(resources.map((r: Resource) => [r.id, r]));
+    const competencesMap = new Map(competences.map((c: Competence) => [c.id, c]));
 
     return {
       businessUnits: businessUnitsMap,
@@ -64,22 +52,39 @@ export function useProjectData() {
   }, [projects]);
 
   const refetchAll = () => {
-    refetchProjects();
-    refetchResources();
-    refetchBusinessUnits();
-    refetchCompetences();
+    queryClient.invalidateQueries({ queryKey: queryKeys.projects });
+    queryClient.invalidateQueries({ queryKey: queryKeys.resources });
+    queryClient.invalidateQueries({ queryKey: queryKeys.businessUnits });
+    queryClient.invalidateQueries({ queryKey: queryKeys.competences });
+  };
+
+  const refetchProjects = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.projects });
+  };
+
+  const refetchResources = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.resources });
+  };
+
+  const refetchBusinessUnits = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.businessUnits });
+  };
+
+  const refetchCompetences = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.competences });
   };
 
   const createProject = async (project: Project) => {
-    return await upsertProject(project);
+    return await upsertProjectMutation.mutateAsync(project);
   };
 
   const updateProject = async (project: Project) => {
-    return await upsertProject(project);
+    return await upsertProjectMutation.mutateAsync(project);
   };
 
   const deleteProject = async (id: string) => {
-    return await removeProject(id);
+    await deleteProjectMutation.mutateAsync(id);
+    return true;
   };
 
   useDatabaseRefresh(refetchAll);
@@ -121,19 +126,19 @@ export function useProjectById(projectId: string) {
   const projectData = useMemo(() => {
     if (!projects || projects.length === 0) return null;
 
-    const project = projects.find((p) => p.id === projectId);
+    const project = projects.find((p: Project) => p.id === projectId);
 
     if (!project) {
       return null;
     }
 
     const businessUnit = lookupMaps.businessUnits.get(project.businessUnitId);
-    const projectResources = resources.filter((resource) =>
-      project.resourceAllocations?.some((allocation) => allocation.resourceId === resource.id)
+    const projectResources = resources.filter((resource: Resource) =>
+      project.resourceAllocations?.some((allocation: any) => allocation.resourceId === resource.id)
     );
 
-    const projectCompetenceIds = new Set(projectResources.map((r) => r.competenceId));
-    const projectCompetences = competences.filter((c) => projectCompetenceIds.has(c.id));
+    const projectCompetenceIds = new Set(projectResources.map((r: Resource) => r.competenceId));
+    const projectCompetences = competences.filter((c: Competence) => projectCompetenceIds.has(c.id));
 
     return {
       project,

@@ -46,18 +46,18 @@ export const apiService = {
 
   async upsert<T extends { id?: string }>(container: ContainerTypes, item: T): Promise<T> {
     if (item.id) {
-      await fetchJson(`${containerEndpoints[container]}/${item.id}`, {
+      const result = await fetchJson<T>(`${containerEndpoints[container]}/${item.id}`, {
         method: "PUT",
         body: JSON.stringify(item),
       });
-      return item;
+      return result;
     }
 
-    const result = await fetchJson<{ id: string }>(containerEndpoints[container], {
+    const result = await fetchJson<T>(containerEndpoints[container], {
       method: "POST",
       body: JSON.stringify(item),
     });
-    return { ...item, id: result.id };
+    return result;
   },
 
   async delete(container: ContainerTypes, id: string): Promise<void> {

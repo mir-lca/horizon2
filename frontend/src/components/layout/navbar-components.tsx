@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, createContext, useContext, useEffect } from "react";
+import { useState } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { useProjectData } from "@/hooks/use-project-data";
+import { useAppStore } from "@/store/app-store";
+import type { BusinessUnit } from "@/lib/types";
 import {
   Button,
   Popover,
@@ -15,42 +17,9 @@ import {
   SelectValue,
 } from "tr-workspace-components";
 
-export type DateRangeType = {
-  startQuarter: number;
-  startYear: number;
-  endQuarter: number;
-  endYear: number;
-};
-
-export const BusinessUnitContext = createContext<{
-  selectedBusinessUnit: string;
-  setSelectedBusinessUnit: (businessUnit: string) => void;
-}>({
-  selectedBusinessUnit: "all",
-  setSelectedBusinessUnit: () => {},
-});
-
-export const useBusinessUnit = () => useContext(BusinessUnitContext);
-
-export const DEFAULT_DATE_RANGE: DateRangeType = {
-  startQuarter: 1,
-  startYear: 2020,
-  endQuarter: 4,
-  endYear: 2030,
-};
-
-export const DateRangeContext = createContext<{
-  dateRange: DateRangeType;
-  setDateRange: (dateRange: DateRangeType) => void;
-}>({
-  dateRange: DEFAULT_DATE_RANGE,
-  setDateRange: () => {},
-});
-
-export const useDateRange = () => useContext(DateRangeContext);
-
 export function DateRangePicker() {
-  const { dateRange, setDateRange } = useDateRange();
+  const dateRange = useAppStore((state) => state.dateRange);
+  const setDateRange = useAppStore((state) => state.setDateRange);
   const [open, setOpen] = useState(false);
 
   const quarters = [1, 2, 3, 4];
@@ -189,67 +158,10 @@ export function DateRangePicker() {
   );
 }
 
-export function DateRangeProvider({ children }: { children: React.ReactNode }) {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [dateRange, setDateRangeState] = useState<DateRangeType>(DEFAULT_DATE_RANGE);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedDateRange = localStorage.getItem("globalDateRange");
-      if (savedDateRange) {
-        try {
-          setDateRangeState(JSON.parse(savedDateRange));
-        } catch (error) {
-          console.error("Failed to parse saved date range", error);
-        }
-      }
-      setIsLoaded(true);
-    }
-  }, []);
-
-  const setDateRange = (range: DateRangeType) => {
-    setDateRangeState(range);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("globalDateRange", JSON.stringify(range));
-    }
-  };
-
-  return (
-    <DateRangeContext.Provider value={{ dateRange, setDateRange }}>
-      {isLoaded ? children : null}
-    </DateRangeContext.Provider>
-  );
-}
-
-export function BusinessUnitProvider({ children }: { children: React.ReactNode }) {
-  const [selectedBusinessUnit, setSelectedBusinessUnitState] = useState("all");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("selectedBusinessUnit");
-      if (saved) {
-        setSelectedBusinessUnitState(saved);
-      }
-    }
-  }, []);
-
-  const setSelectedBusinessUnit = (businessUnit: string) => {
-    setSelectedBusinessUnitState(businessUnit);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("selectedBusinessUnit", businessUnit);
-    }
-  };
-
-  return (
-    <BusinessUnitContext.Provider value={{ selectedBusinessUnit, setSelectedBusinessUnit }}>
-      {children}
-    </BusinessUnitContext.Provider>
-  );
-}
-
 export function BusinessUnitSelector() {
   const { businessUnits } = useProjectData();
-  const { selectedBusinessUnit, setSelectedBusinessUnit } = useBusinessUnit();
+  const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
+  const setSelectedBusinessUnit = useAppStore((state) => state.setSelectedBusinessUnit);
 
   return (
     <Select value={selectedBusinessUnit} onValueChange={setSelectedBusinessUnit}>
@@ -258,7 +170,7 @@ export function BusinessUnitSelector() {
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All Business Units</SelectItem>
-        {businessUnits.map((bu) => (
+        {businessUnits.map((bu: BusinessUnit) => (
           <SelectItem key={bu.id} value={String(bu.id)}>
             {bu.name}
           </SelectItem>

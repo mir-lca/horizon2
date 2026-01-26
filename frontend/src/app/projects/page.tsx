@@ -30,7 +30,7 @@ import { DropZone } from "@/components/ui/draggable-row";
 import { FilterPanel, FilterState } from "@/components/ui/filter-panel";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "tr-workspace-components";
 import { calculateIRRForProjects } from "@/lib/financial-calculations";
-import { useBusinessUnit } from "@/components/layout/navbar";
+import { useAppStore } from "@/store/app-store";
 import { PageLayout } from "@/components/ui/page-layout";
 
 interface ProjectWithChildren extends Project {
@@ -38,7 +38,7 @@ interface ProjectWithChildren extends Project {
 }
 
 export default function ProjectsPage() {
-  const { selectedBusinessUnit } = useBusinessUnit();
+  const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
 
   const {
     projects,
@@ -154,7 +154,7 @@ export default function ProjectsPage() {
     setSearchQuery(suggestion.value);
 
     if (suggestion.category === "Business Units") {
-      const businessUnit = businessUnits.find((bu) => bu.name === suggestion.value);
+      const businessUnit = businessUnits.find((bu: BusinessUnit) => bu.name === suggestion.value);
       if (businessUnit) {
         setFilters((prev) => ({ ...prev, businessUnitId: businessUnit.id }));
       }
