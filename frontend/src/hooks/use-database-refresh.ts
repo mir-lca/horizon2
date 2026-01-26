@@ -6,20 +6,21 @@ interface RefreshCallback {
   (): void;
 }
 
+/**
+ * Database refresh hook - currently disabled to prevent automatic reloads
+ * when switching tabs or bringing app to foreground.
+ *
+ * TODO: Implement manual refresh with debouncing as part of improvement #10
+ */
 export function useDatabaseRefresh(refreshCallback: RefreshCallback) {
+  // Disabled automatic refresh on window focus/visibility changes
+  // User reported unwanted reload behavior when switching tabs
+
   useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        refreshCallback();
-      }
-    };
-
-    window.addEventListener("focus", handleVisibility);
-    document.addEventListener("visibilitychange", handleVisibility);
-
+    // Automatic refresh disabled - hook is now a no-op
+    // To re-enable in the future, add debouncing and make it opt-in
     return () => {
-      window.removeEventListener("focus", handleVisibility);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      // Cleanup
     };
   }, [refreshCallback]);
 }
