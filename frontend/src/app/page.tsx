@@ -64,13 +64,11 @@ const DashboardContainer = ({ children }: PropsWithChildren) => (
 
 const GanttPanelContent = ({
   filteredProjects,
-  setProjects,
   selectedBusinessUnit,
   dateRange,
   onSaveProjects,
 }: {
   filteredProjects: Project[];
-  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
   selectedBusinessUnit: string;
   dateRange: any;
   onSaveProjects: (projects: Project[]) => Promise<void>;
@@ -86,12 +84,7 @@ const GanttPanelContent = ({
           selectedBusinessUnit={selectedBusinessUnit}
           timeline={{ startYear: dateRange.startYear, endYear: dateRange.endYear }}
           onProjectChange={async (updatedProjects) => {
-            setProjects((prevProjects) => {
-              const updatedProjectsMap = new Map(updatedProjects.map((p) => [p.id, p]));
-              return prevProjects.map((project) =>
-                updatedProjectsMap.has(project.id) ? updatedProjectsMap.get(project.id)! : project
-              );
-            });
+            // React Query will automatically refetch after mutation completes
             await onSaveProjects(updatedProjects);
           }}
         />
@@ -100,26 +93,29 @@ const GanttPanelContent = ({
   </Card>
 );
 
+let renderCount = 0;
+
 export default function Dashboard() {
-  console.log("[Dashboard] Component rendering");
+  renderCount++;
+  if (renderCount % 100 === 0) {
+    console.warn(`[Dashboard] Rendered ${renderCount} times - possible render loop!`);
+  }
+
   const dateRange = useAppStore((state) => state.dateRange);
   const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
 
   const { projects: fetchedProjects, resources, businessUnits, competences, loading: isLoading, error: dataError, updateProject } =
     useProjectData();
 
-  const [projects, setProjects] = useState<Project[]>([]);
   const [showVisibleOnly, setShowVisibleOnly] = useState(true);
 
-  useEffect(() => {
-    if (Array.isArray(fetchedProjects)) {
-      setProjects(
-        fetchedProjects.map((project) => ({
-          ...project,
-          resourceAllocations: project.resourceAllocations || [],
-        }))
-      );
-    }
+  // Use useMemo instead of useEffect+useState to avoid render loop
+  const projects = useMemo(() => {
+    if (!Array.isArray(fetchedProjects)) return [];
+    return fetchedProjects.map((project) => ({
+      ...project,
+      resourceAllocations: project.resourceAllocations || [],
+    }));
   }, [fetchedProjects]);
 
   const businessUnitFilteredProjects = useMemo(() => {
@@ -293,7 +289,6 @@ export default function Dashboard() {
           <div className="h-full p-4 sm:p-6">
             <GanttPanelContent
               filteredProjects={businessUnitFilteredProjects}
-              setProjects={setProjects}
               selectedBusinessUnit={selectedBusinessUnit}
               dateRange={dateRange}
               onSaveProjects={handleSaveProjects}

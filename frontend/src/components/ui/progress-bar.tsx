@@ -16,10 +16,7 @@ export function ProgressBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  console.log("[ProgressBar] Component rendered", { pathname, searchParams: searchParams?.toString() });
-
   useEffect(() => {
-    console.log("[ProgressBar] useEffect triggered - calling NProgress.done()");
     NProgress.done();
   }, [pathname, searchParams]);
 

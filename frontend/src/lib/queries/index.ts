@@ -27,13 +27,10 @@ function useItems<T>(
   queryKey: readonly string[],
   schema?: any
 ) {
-  console.log(`[useItems] Hook called for ${containerType}`);
   return useQuery({
     queryKey,
     queryFn: async () => {
-      console.log(`[useItems] Query function executing for ${containerType} - fetching data`);
       const data = await apiService.getAll<T>(containerType);
-      console.log(`[useItems] Data received for ${containerType}, validating...`);
       if (schema) {
         try {
           return schema.parse(data);

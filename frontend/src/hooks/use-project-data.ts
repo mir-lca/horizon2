@@ -18,7 +18,6 @@ import { ProjectUtils } from "@/lib/project-utils";
 import { useDatabaseRefresh } from "./use-database-refresh";
 
 export function useProjectData() {
-  console.log("[useProjectData] Hook called");
   const queryClient = useQueryClient();
 
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useProjects();

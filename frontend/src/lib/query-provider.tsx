@@ -6,9 +6,8 @@ import { useState, type ReactNode } from "react";
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
-    () => {
-      console.log("[QueryProvider] Creating new QueryClient");
-      return new QueryClient({
+    () =>
+      new QueryClient({
         defaultOptions: {
           queries: {
             staleTime: 30000, // 30 seconds (matches previous CACHE_EXPIRY_MS)
@@ -22,8 +21,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             retry: 1,
           },
         },
-      });
-    }
+      })
   );
 
   return (

@@ -38,7 +38,6 @@ interface ProjectWithChildren extends Project {
 }
 
 export default function ProjectsPage() {
-  console.log("[ProjectsPage] Component rendering");
   const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
 
   const {

@@ -34,21 +34,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   useEffect(() => {
-    console.log("[RootLayout] Mounting - setting up event listeners for debugging");
+    let focusCount = 0;
+    let visibilityCount = 0;
 
     const handleFocus = () => {
-      console.log("[Window Event] Focus event triggered");
+      focusCount++;
+      console.log(`[FOCUS EVENT #${focusCount}] Window focused`);
     };
 
     const handleVisibility = () => {
-      console.log("[Document Event] Visibility changed:", document.visibilityState);
+      visibilityCount++;
+      console.log(`[VISIBILITY EVENT #${visibilityCount}] State: ${document.visibilityState}`);
     };
 
     window.addEventListener("focus", handleFocus);
     document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      console.log("[RootLayout] Unmounting - cleaning up event listeners");
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
