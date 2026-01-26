@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -6,6 +7,8 @@ import { Navbar } from "@/components/layout/navbar";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { QueryProvider } from "@/lib/query-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { DashboardSkeleton } from "@/components/ui/loading-skeleton";
 // import { FeedbackProvider } from "tr-workspace-components"; // Temporarily disabled due to React.Children.only error
 
 const geistSans = Geist({
@@ -35,10 +38,13 @@ export default function RootLayout({
           <QueryProvider>
             <ThemeProvider defaultTheme="system" storageKey="horizon-theme">
               <>
+                <ProgressBar />
                 <div className="flex flex-col min-h-screen">
                   <Navbar />
                   <main className="flex-1 flex flex-col min-h-0 overflow-auto md:overflow-hidden">
-                    {children}
+                    <Suspense fallback={<DashboardSkeleton />}>
+                      {children}
+                    </Suspense>
                   </main>
                 </div>
                 <Toaster position="top-right" />
