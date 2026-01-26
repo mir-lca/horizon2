@@ -6,20 +6,24 @@ import { useState, type ReactNode } from "react";
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
-    () =>
-      new QueryClient({
+    () => {
+      console.log("[QueryProvider] Creating new QueryClient");
+      return new QueryClient({
         defaultOptions: {
           queries: {
             staleTime: 30000, // 30 seconds (matches previous CACHE_EXPIRY_MS)
             gcTime: 5 * 60 * 1000, // 5 minutes
             refetchOnWindowFocus: false, // Controlled by database refresh hook
+            refetchOnMount: false, // Don't refetch on component mount
+            refetchOnReconnect: false, // Don't refetch on network reconnect
             retry: 1,
           },
           mutations: {
             retry: 1,
           },
         },
-      })
+      });
+    }
   );
 
   return (

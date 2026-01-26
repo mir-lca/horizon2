@@ -1,4 +1,7 @@
+"use client";
+
 import type { Metadata } from "next";
+import { useEffect } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,16 +22,38 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Horizon",
-  description: "Program and project portfolio dashboard",
-};
+// Move metadata to a separate file due to "use client" directive
+// export const metadata: Metadata = {
+//   title: "Horizon",
+//   description: "Program and project portfolio dashboard",
+// };
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => {
+    console.log("[RootLayout] Mounting - setting up event listeners for debugging");
+
+    const handleFocus = () => {
+      console.log("[Window Event] Focus event triggered");
+    };
+
+    const handleVisibility = () => {
+      console.log("[Document Event] Visibility changed:", document.visibilityState);
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      console.log("[RootLayout] Unmounting - cleaning up event listeners");
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>

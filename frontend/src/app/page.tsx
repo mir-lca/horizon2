@@ -101,6 +101,7 @@ const GanttPanelContent = ({
 );
 
 export default function Dashboard() {
+  console.log("[Dashboard] Component rendering");
   const dateRange = useAppStore((state) => state.dateRange);
   const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
 
