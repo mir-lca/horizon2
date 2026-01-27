@@ -151,29 +151,10 @@ export function SvarGanttPanel({
   }, []);
 
   // Configure columns for the left panel
+  // Temporarily disabled custom columns to fix SVAR Gantt initialization
+  // SVAR will auto-generate columns from task data
   const columns = useMemo(() => {
-    return [
-      {
-        id: "text",
-        header: "Project Name",
-        width: 250,
-        flexgrow: 1,
-      },
-      {
-        id: "businessUnit",
-        header: "Business Unit",
-        width: 150,
-      },
-      {
-        id: "status",
-        header: "Status",
-        width: 100,
-        cell: (data: ITask) => {
-          const status = (data as any).status || 'unknown';
-          return `<span class="px-2 py-1 rounded text-xs font-semibold ${getStatusColor(status)}">${status}</span>`;
-        },
-      },
-    ];
+    return undefined; // Let SVAR auto-generate columns
   }, []);
 
   // Handle task updates (drag, resize)
@@ -241,21 +222,19 @@ export function SvarGanttPanel({
     const startYear = timeline?.startYear || 2020;
     const endYear = timeline?.endYear || 2030;
 
-    const ganttConfig = {
+    const ganttConfig: Partial<IConfig> = {
       start: new Date(startYear, 0, 1),
       end: new Date(endYear, 11, 31),
-      lengthUnit: "quarter",
+      lengthUnit: "quarter" as const,
       cellWidth: 40,
       cellHeight: 40,
-      scales,
-      columns,
       zoom: false,
       readonly: false,
     };
 
     console.log('SvarGanttPanel - config:', ganttConfig);
     return ganttConfig;
-  }, [timeline, scales, columns]);
+  }, [timeline]);
 
   console.log('SvarGanttPanel - Rendering with tasks:', tasks.length);
 
@@ -322,7 +301,14 @@ export function SvarGanttPanel({
       <div className="flex-1 min-h-0">
         <Gantt
           tasks={tasks}
-          {...config}
+          scales={scales}
+          start={config.start}
+          end={config.end}
+          lengthUnit={config.lengthUnit}
+          cellWidth={config.cellWidth}
+          cellHeight={config.cellHeight}
+          zoom={config.zoom}
+          readonly={config.readonly}
           init={handleInit}
           onupdatetask={handleUpdateTask}
           onselecttask={handleSelectTask}
