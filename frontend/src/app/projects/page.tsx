@@ -32,7 +32,7 @@ import { FilterPanel, FilterState } from "@/components/features/filter-panel";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui";
 import { calculateIRRForProjects } from "@/lib/financial-calculations";
 import { useAppStore } from "@/store/app-store";
-import { PageLayout } from "@/components/ui/page-layout";
+import { PageLayout } from "@/components/layout";
 
 export default function ProjectsPage() {
   const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
@@ -428,7 +428,12 @@ export default function ProjectsPage() {
 
   if (error) {
     return (
-      <PageLayout title="Projects" subtitle="Manage projects and hierarchy">
+      <PageLayout
+        header={{
+          title: "Projects",
+          subtitle: "Manage projects and hierarchy",
+        }}
+      >
         <div className="flex items-center justify-center h-full">
           <ErrorMessage message={error.message || "Failed to load projects"} backHref="/" backLabel="Back to Home" />
         </div>
@@ -438,13 +443,15 @@ export default function ProjectsPage() {
 
   return (
     <PageLayout
-      title="Projects"
-      subtitle="Manage projects and hierarchy"
-      actions={
-        <Button onClick={handleOpenCreateDialog}>
-          Create Project
-        </Button>
-      }
+      header={{
+        title: "Projects",
+        subtitle: "Manage projects and hierarchy",
+        actions: (
+          <Button onClick={handleOpenCreateDialog}>
+            Create Project
+          </Button>
+        ),
+      }}
       className="max-w-7xl mx-auto px-4 py-3 h-[calc(100vh-4rem)] overflow-hidden flex flex-col"
     >
       <div className="flex flex-col min-h-0 flex-1">

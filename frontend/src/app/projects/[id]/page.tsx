@@ -1,9 +1,9 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui";
+import { PageLayout } from "@/components/layout";
 import { Project, RevenueEstimate, YearlyFinancialMetric } from "@/lib/types";
 import { useProjectById } from "@/hooks/use-project-data";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -61,35 +61,44 @@ export default function ProjectDetailPage() {
 
   if (error || !exists || !project) {
     return (
-      <div className="container mx-auto px-4 py-10">
+      <PageLayout
+        header={{
+          title: "Project Not Found",
+          breadcrumbs: [
+            { label: "Home", href: "/" },
+            { label: "Projects", href: "/projects" },
+          ],
+        }}
+      >
         <ErrorMessage message={error?.message || `Project not found with ID: ${projectId}`} backHref="/projects" backLabel="Back to Projects" />
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-sm text-muted-foreground">
-            <Link href="/projects" className="hover:text-foreground transition-colors">
-              Projects
-            </Link>{" "}
-            / {project.name}
-          </div>
-          <h1 className="text-xl font-semibold">{project.name}</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
-            Edit Project
-          </Button>
-          <Button variant="destructive" onClick={handleDelete}>
-            Delete
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-6">
+    <PageLayout
+      header={{
+        title: project.name,
+        breadcrumbs: [
+          { label: "Home", href: "/" },
+          { label: "Projects", href: "/projects" },
+          { label: project.name },
+        ],
+        actions: (
+          <>
+            <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
+              Edit
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </>
+        ),
+      }}
+      className="max-w-7xl mx-auto px-4 py-8"
+    >
+      <div className="space-y-8">
+        <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2">
           <FinancialChart projects={project} cardStyle={true} title="Financial Forecast" />
         </div>
@@ -126,6 +135,7 @@ export default function ProjectDetailPage() {
         resources={allResources}
         competences={allCompetences}
       />
+      </div>
 
       {!navigating && project && (
         <ProjectEditDialog
@@ -137,6 +147,6 @@ export default function ProjectDetailPage() {
           dialogTitle="Edit Project"
         />
       )}
-    </div>
+    </PageLayout>
   );
 }
