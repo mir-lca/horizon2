@@ -461,6 +461,85 @@ Implementing 10 powerful components identified from Dribbble analysis to moderni
 
 ---
 
+### Phase 13c: Fix Dashboard Width Overflow (Playwright Analysis) 🔄
+**Goal:** Fix persistent dashboard width overflow using detailed browser analysis
+
+**Issue:**
+- Dashboard still overflows horizontally despite Phase 13 and 13b fixes
+- User reported: "main dashboard is still heavily overflowing in terms of width"
+- Phase 13b overflow fixes not effective
+
+**Playwright Analysis Results:**
+At 1024px viewport:
+- **ScrollArea viewport:** 455px wide (correct, respects ResizablePanel constraint)
+- **ScrollArea content:** 2233px wide (!!!)
+- **Overflow detected:** 1777px beyond viewport
+- **Root cause:** Content inside ScrollArea not respecting container width
+
+**Overflowing Elements Identified:**
+1. **ScrollArea content div** (`p-4 sm:p-6 space-y-6`): 2233px wide
+   - Should be: 455px (container width)
+   - No width constraint applied
+
+2. **Financial Forecast card**: 2185px wide
+   - Grid inside: `grid-cols-3` → `717px 717px 717px` (fixed columns)
+   - Footer metrics: "Add. Revenue / IRR Increase / Add. Investment"
+
+3. **KPI metrics grid**: 2185px wide
+   - Grid: `grid-cols-1 md:grid-cols-2` → `1084px 1084px` (fixed columns at md breakpoint)
+   - Contains: Total Revenue, IRR, Total Sustaining Cost, Hiring Investment cards
+
+**Root Cause Analysis:**
+- Phase 13b applied overflow constraints to panels but not to ScrollArea content
+- Grids calculate column widths based on content width, not container width
+- Missing `w-full` and `max-w-full` on ScrollArea content wrapper
+- Grid columns use fixed pixel widths instead of flexible `1fr` units
+
+**Tasks:**
+- [ ] Add `w-full` class to ScrollArea content div (`p-4 sm:p-6 space-y-6`)
+- [ ] Add `max-w-full` to all child cards
+- [ ] Ensure grids respect container width with proper responsive classes
+- [ ] Test at multiple viewport sizes (1024px, 1366px, 1920px)
+- [ ] Verify no horizontal scroll at any size
+- [ ] Commit fix
+
+**Files to Modify:**
+- `frontend/src/app/page.tsx` (ScrollArea content wrapper, card constraints)
+
+**Solutions to Implement:**
+
+1. **ScrollArea Content Constraint:**
+   ```tsx
+   <ScrollArea className={SCROLL_AREA_CLASSES}>
+     <div className="p-4 sm:p-6 space-y-6 w-full max-w-full">
+       {/* Content */}
+     </div>
+   </ScrollArea>
+   ```
+
+2. **Card Constraints:**
+   ```tsx
+   <Card className="overflow-hidden w-full max-w-full">
+     {/* Card content */}
+   </Card>
+   ```
+
+3. **Grid Responsiveness:**
+   - Verify `grid-cols-3` and `grid-cols-1 md:grid-cols-2` work within constrained container
+   - Grids should use percentage-based or `1fr` columns, not fixed pixels
+
+**Verification Steps:**
+1. Test at 1024px viewport - no overflow
+2. Test at 768px viewport (tablet) - proper stacking
+3. Test at 1920px viewport (desktop) - proper layout
+4. Test horizontal resize - no overflow at any width
+
+**Estimated Time:** 30 minutes
+**Actual Time:** TBD
+**Status:** 🔄 In Progress
+
+---
+
 ## 📊 Progress Tracking
 
 ### Summary

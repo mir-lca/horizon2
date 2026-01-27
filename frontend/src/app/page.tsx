@@ -223,7 +223,7 @@ export default function Dashboard() {
     const hasVisibleUnfunded = unfundedProjects.length > 0;
 
     return (
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden w-full max-w-full">
         <CardHeader className="px-4 sm:px-6 py-3">
           <CardTitle className="text-base sm:text-lg font-medium">Financial Forecast</CardTitle>
         </CardHeader>
@@ -291,9 +291,9 @@ export default function Dashboard() {
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={45} minSize={30} className="overflow-hidden">
           <ScrollArea className={SCROLL_AREA_CLASSES}>
-            <div className="p-4 sm:p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6 w-full max-w-full">
               {renderFinancialChart()}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
                 <FinancialRangeCard
                   title="Total Revenue"
                   valueLow={formatCurrencyInMillions(visibleUnfundedMetrics.revenue.lowTotal)}
@@ -313,7 +313,7 @@ export default function Dashboard() {
                 />
               </div>
 
-              <Card>
+              <Card className="w-full max-w-full">
                 <CardHeader className="px-4 sm:px-6 py-3 flex flex-row items-center justify-between">
                   <div>
                     <CardTitle className="text-base sm:text-lg font-medium">Resource Gaps</CardTitle>
