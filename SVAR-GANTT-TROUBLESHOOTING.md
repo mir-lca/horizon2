@@ -61,21 +61,58 @@
 
 ---
 
+### Attempt 4: Remove Custom Scales (Commit: TBD)
+**Date:** 2026-01-27 09:15 AM
+**Hypothesis:** Custom scales format functions incompatible with SVAR's internal processing
+**Analysis of Latest Logs:**
+- Error doesn't happen immediately during data processing
+- Multiple render cycles complete successfully
+- Task JSON structure is valid
+- Config is valid
+- Error occurs AFTER SVAR Gantt mounts and tries to process scales internally
+- This suggests scales configuration format is incompatible with SVAR's expectations
+
+**Changes:**
+- Commented out entire scales configuration
+- Removed `scales={scales}` prop from Gantt component
+- Let SVAR auto-generate scales based on `start`, `end`, and `lengthUnit` props
+- SVAR should automatically create Year + Quarter scales from `lengthUnit="quarter"`
+
+**Expectation:**
+- If scales were the problem, error should disappear
+- SVAR should render with auto-generated quarterly timeline
+- Years and quarters should display (may look different from custom format)
+
+**Result:** ⏳ PENDING USER VALIDATION
+
+**Testing Instructions:**
+1. Refresh browser (Cmd+Shift+R)
+2. Check console for forEach error
+3. Check if Gantt renders with years and quarters
+4. Check if project bars appear
+
+---
+
 ## Current Status
 
-**The forEach error persists despite:**
-1. ✓ Fixing year format function
-2. ✓ Fixing parent assignment
-3. ✓ Removing custom columns
-4. ✓ Passing props individually
-5. ✓ Valid task data structure
-6. ✓ Valid config object
+**The forEach error persisted through:**
+1. ✓ Fixing year format function (Attempt 1)
+2. ✓ Fixing parent assignment (Attempt 1)
+3. ✓ Removing custom columns (Attempt 2)
+4. ✓ Passing props individually (Attempt 2)
+5. ✓ Adding links array (Attempt 3)
+6. ✓ Valid task data structure
+7. ✓ Valid config object
 
-**This indicates the problem is elsewhere:**
-- Possibly scales configuration format
-- Possibly missing links array
-- Possibly task structure issue SVAR doesn't explicitly validate
-- Possibly incompatibility with Next.js/React 19
+**Current test (Attempt 4):**
+- Removed custom scales entirely
+- Testing if scales format functions cause the error
+
+**Key Pattern Observed (from latest logs):**
+- Error doesn't occur immediately
+- Data processing completes successfully (10+ render cycles)
+- Error triggers AFTER SVAR mounts and processes scales
+- This strongly suggests scales configuration is incompatible
 
 ## Next Steps to Try
 

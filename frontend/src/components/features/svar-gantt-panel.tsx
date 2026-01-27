@@ -138,23 +138,24 @@ export function SvarGanttPanel({
   }, [filteredProjects]);
 
   // Configure scales for quarterly view
-  const scales = useMemo(() => {
-    return [
-      {
-        unit: "year" as const,
-        step: 1,
-        format: (date: Date) => date.getFullYear().toString(),
-      },
-      {
-        unit: "quarter" as const,
-        step: 1,
-        format: (date: Date) => {
-          const quarter = Math.floor(date.getMonth() / 3) + 1;
-          return `Q${quarter}`;
-        },
-      },
-    ];
-  }, []);
+  // REMOVED: Testing if custom scales are causing forEach error
+  // const scales = useMemo(() => {
+  //   return [
+  //     {
+  //       unit: "year" as const,
+  //       step: 1,
+  //       format: (date: Date) => date.getFullYear().toString(),
+  //     },
+  //     {
+  //       unit: "quarter" as const,
+  //       step: 1,
+  //       format: (date: Date) => {
+  //         const quarter = Math.floor(date.getMonth() / 3) + 1;
+  //         return `Q${quarter}`;
+  //       },
+  //     },
+  //   ];
+  // }, []);
 
   // Configure columns for the left panel
   // Temporarily disabled custom columns to fix SVAR Gantt initialization
@@ -308,7 +309,6 @@ export function SvarGanttPanel({
         <Gantt
           tasks={tasks}
           links={[]}
-          scales={scales}
           start={config.start}
           end={config.end}
           lengthUnit={config.lengthUnit}
