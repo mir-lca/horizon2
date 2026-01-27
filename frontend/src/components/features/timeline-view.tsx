@@ -93,9 +93,9 @@ export function TimelineView({
   return (
     <div className="space-y-4">
       {/* Timeline Header with Two-Column Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 timeline-scroll-container overflow-x-auto">
         {/* LEFT: Empty space for alignment with project names */}
-        <div className="hidden md:block border-r border-[var(--border)] pr-4" />
+        <div className="hidden md:block border-r border-[var(--border)] pr-4 timeline-project-name" />
 
         {/* RIGHT: Timeline columns */}
         <div className="relative min-w-0 pt-10">
@@ -159,7 +159,7 @@ export function TimelineView({
       </div>
 
       {/* Project Rows with Two-Column Layout */}
-      <div className="space-y-4">
+      <div className="space-y-4 timeline-scroll-container overflow-x-auto">
         {filteredProjects.map((project, index) => {
           const barStyle = getProjectBarStyle(project);
 
@@ -186,7 +186,7 @@ export function TimelineView({
               }}
             >
               {/* LEFT COLUMN: Project Info (Fixed Width) */}
-              <div className="flex flex-col gap-1 md:pr-4 md:border-r border-[var(--border)]">
+              <div className="flex flex-col gap-1 md:pr-4 md:border-r border-[var(--border)] timeline-project-name">
                 <div className="flex items-center gap-2">
                   <StatusDot status={project.status as any} />
                   <span className="font-medium text-sm text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors truncate">

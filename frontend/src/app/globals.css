@@ -397,6 +397,33 @@ html {
 }
 
 /* ============================================================================
+   TIMELINE VIEW STICKY PROJECT NAMES
+   ============================================================================ */
+
+/* Make project name column sticky during horizontal scroll in timeline view */
+.timeline-project-name {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background-color: var(--background);
+}
+
+/* Add shadow effect when scrolling to indicate sticky behavior */
+.timeline-scroll-container {
+  position: relative;
+}
+
+.timeline-project-name::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+/* ============================================================================
    ENHANCED CARD AND DIALOG PADDING
    ============================================================================ */
 

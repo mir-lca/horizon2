@@ -104,7 +104,7 @@ export function useUpsertProject() {
   return useMutation({
     mutationFn: (project: Project) =>
       apiService.upsert<Project>(ContainerTypes.PROJECTS, project),
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       // Optimistic update
       queryClient.setQueryData<Project[]>(queryKeys.projects, (old = []) => {
         const index = old.findIndex((p) => p.id === data.id);
@@ -115,7 +115,9 @@ export function useUpsertProject() {
         }
         return [...old, data];
       });
-      toast.success("Project updated successfully");
+      // Show appropriate toast based on whether it was a create or update
+      const isCreate = !variables.id || variables.id === "";
+      toast.success(isCreate ? "Project created successfully" : "Project updated successfully");
     },
     onError: (error: any) => {
       // Handle structured validation errors from server

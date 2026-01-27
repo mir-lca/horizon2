@@ -367,11 +367,9 @@ export default function ProjectsPage() {
 
       if (result) {
         setEditDialogOpen(false);
-        toast.success("Project updated successfully");
       }
     } catch (error) {
       console.error("Error updating project:", error);
-      toast.error("Failed to update project");
     }
   };
 
@@ -386,11 +384,9 @@ export default function ProjectsPage() {
 
       if (result) {
         setCreateDialogOpen(false);
-        toast.success("Project created successfully");
       }
     } catch (error) {
       console.error("Error creating project:", error);
-      toast.error("Failed to create project");
     }
   };
 
@@ -449,7 +445,7 @@ export default function ProjectsPage() {
           Create Project
         </Button>
       }
-      className="container mx-auto px-4 py-3 h-[calc(100vh-4rem)] overflow-hidden flex flex-col"
+      className="max-w-7xl mx-auto px-4 py-3 h-[calc(100vh-4rem)] overflow-hidden flex flex-col"
     >
       <div className="flex flex-col min-h-0 flex-1">
         <div className="mb-6 flex items-center gap-3">

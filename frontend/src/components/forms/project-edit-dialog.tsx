@@ -55,7 +55,6 @@ export function ProjectEditDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error saving project:", error);
-      toast.error("Failed to update project");
     }
   };
 
