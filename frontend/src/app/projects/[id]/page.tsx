@@ -93,7 +93,6 @@ export default function ProjectDetailPage() {
           </>
         ),
       }}
-      className="max-w-7xl mx-auto px-4 py-6"
     >
       <div className="space-y-8">
         <div className="grid grid-cols-3 gap-6">
