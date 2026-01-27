@@ -4,7 +4,6 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Project } from "@/lib/types";
 import { StatusDot } from "@/components/ui/status-dot";
-import { ToolAvatarStack } from "@/components/ui/tool-avatar-stack";
 import { cn } from "@/lib/utils";
 
 interface TimelineViewProps {
@@ -17,16 +16,8 @@ interface TimelineViewProps {
 /**
  * Timeline View Component
  *
- * Replaces SVAR Gantt with simpler horizontal progress bars
- * Based on Dribbble pattern #9 - Timeline Progress Bars with striped remainder
- *
- * Features:
- * - Horizontal progress bars per project
- * - Solid color for completed portion
- * - Diagonal stripes for remaining time
- * - "Today" marker
- * - Project metadata (name, status, team, dates)
- * - Framer Motion animations
+ * Simplified timeline with cleaner header design
+ * Follows UI/UX best practices: hierarchical headers, proper spacing, minimal clutter
  */
 export function TimelineView({
   projects,
@@ -93,31 +84,56 @@ export function TimelineView({
     );
   }
 
+  // Generate years for header
+  const years = Array.from(
+    { length: timelineRange.endYear - timelineRange.startYear + 1 },
+    (_, i) => timelineRange.startYear + i
+  );
+
   return (
     <div className="space-y-6">
-      {/* Timeline Header */}
-      <div className="relative h-12 border-b border-[var(--border)]">
-        <div className="flex h-full">
-          {Array.from({ length: timelineRange.totalQuarters }).map((_, index) => {
-            const year = timelineRange.startYear + Math.floor(index / 4);
-            const quarter = (index % 4) + 1;
+      {/* Simplified Timeline Header */}
+      <div className="relative">
+        {/* Year Headers - Clean and Bold */}
+        <div className="flex border-b-2 border-[var(--border)] pb-2 mb-2">
+          {years.map((year) => (
+            <div key={year} className="flex-1 text-center">
+              <div className="text-lg font-bold text-[var(--foreground)]">{year}</div>
+            </div>
+          ))}
+        </div>
 
-            // Only show label every 4 quarters (yearly)
-            const isYearStart = quarter === 1;
+        {/* Quarter Grid - Minimal Labels */}
+        <div className="flex h-8 border-b border-[var(--border)]">
+          {Array.from({ length: timelineRange.totalQuarters }).map((_, index) => {
+            const quarter = (index % 4) + 1;
+            const isFirstQuarter = quarter === 1;
 
             return (
               <div
                 key={index}
-                className="flex-1 border-r border-[var(--border)] last:border-r-0 text-center"
+                className="flex-1 border-r border-[var(--border)] last:border-r-0 text-center relative"
               >
-                {isYearStart && (
-                  <div className="text-sm font-semibold text-[var(--foreground)]">
-                    {year}
+                {isFirstQuarter && (
+                  <div className="text-xs text-[var(--muted-foreground)] absolute top-0 left-1">
+                    Q1
                   </div>
                 )}
-                <div className="text-xs text-[var(--muted-foreground)] mt-1">
-                  Q{quarter}
-                </div>
+                {quarter === 2 && (
+                  <div className="text-xs text-[var(--muted-foreground)] absolute top-0 left-1/2 -translate-x-1/2 opacity-50">
+                    Q2
+                  </div>
+                )}
+                {quarter === 3 && (
+                  <div className="text-xs text-[var(--muted-foreground)] absolute top-0 left-1/2 -translate-x-1/2 opacity-50">
+                    Q3
+                  </div>
+                )}
+                {quarter === 4 && (
+                  <div className="text-xs text-[var(--muted-foreground)] absolute top-0 right-1 opacity-50">
+                    Q4
+                  </div>
+                )}
               </div>
             );
           })}
@@ -126,10 +142,10 @@ export function TimelineView({
         {/* Today marker */}
         {todayPosition >= 0 && todayPosition <= 100 && (
           <div
-            className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10"
+            className="absolute bottom-0 top-0 w-0.5 bg-red-500 z-10"
             style={{ left: `${todayPosition}%` }}
           >
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-semibold text-red-500 whitespace-nowrap">
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded whitespace-nowrap">
               Today
             </div>
           </div>
@@ -137,7 +153,7 @@ export function TimelineView({
       </div>
 
       {/* Project Rows */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {filteredProjects.map((project, index) => {
           const barStyle = getProjectBarStyle(project);
 
@@ -154,7 +170,7 @@ export function TimelineView({
               onClick={() => onProjectClick?.(project.id)}
             >
               {/* Project Info */}
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <StatusDot status={project.status as any} />
                   <span className="font-medium text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">
@@ -177,10 +193,11 @@ export function TimelineView({
                 </div>
               </div>
 
-              {/* Progress Bar */}
-              <div className="relative h-12 bg-[var(--muted)]/30 rounded-lg overflow-hidden">
+              {/* Progress Bar Track */}
+              <div className="relative h-14 bg-[var(--muted)]/20 rounded-lg">
+                {/* Project Bar */}
                 <motion.div
-                  className="absolute inset-y-0 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow"
+                  className="absolute inset-y-2 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow"
                   style={{
                     left: barStyle.left,
                     width: barStyle.width,
@@ -224,24 +241,11 @@ export function TimelineView({
 
                   {/* Progress percentage label */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-white drop-shadow-lg">
+                    <span className="text-sm font-semibold text-white drop-shadow-lg">
                       {barStyle.completion}%
                     </span>
                   </div>
                 </motion.div>
-
-                {/* Start/End date labels */}
-                <div className="absolute inset-0 flex items-center justify-between px-2 pointer-events-none">
-                  <span className="text-xs text-[var(--muted-foreground)]">
-                    {formatQuarter(project.startYear, project.startQuarter)}
-                  </span>
-                  <span className="text-xs text-[var(--muted-foreground)]">
-                    {formatQuarter(
-                      project.startYear + Math.floor((project.startQuarter + project.durationQuarters - 1) / 4),
-                      ((project.startQuarter + project.durationQuarters - 1) % 4) + 1
-                    )}
-                  </span>
-                </div>
               </div>
             </motion.div>
           );
