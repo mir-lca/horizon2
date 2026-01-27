@@ -73,11 +73,11 @@ const GanttPanelContent = ({
   dateRange: any;
   onSaveProjects: (projects: Project[]) => Promise<void>;
 }) => (
-  <Card className="h-full flex flex-col overflow-hidden">
+  <Card className="h-full flex flex-col overflow-hidden max-w-full">
     <CardHeader className="px-4 sm:px-6 py-3 flex-shrink-0">
       <CardTitle className="text-base sm:text-lg font-medium">Project Timeline</CardTitle>
     </CardHeader>
-    <CardContent className="flex-1 min-h-0 p-4 sm:p-6 overflow-auto">
+    <CardContent className="flex-1 min-h-0 min-w-0 p-4 sm:p-6 overflow-auto">
       <Suspense fallback={<LoadingState message="Loading timeline..." />}>
         <TimelineView
           projects={filteredProjects}
@@ -278,8 +278,8 @@ export default function Dashboard() {
   return (
     <DashboardContainer>
       <ResizablePanelGroup direction={isMobile ? "vertical" : "horizontal"} className="h-full">
-        <ResizablePanel defaultSize={55} minSize={35}>
-          <div className="h-full p-4 sm:p-6">
+        <ResizablePanel defaultSize={55} minSize={35} className="overflow-hidden">
+          <div className="h-full p-4 sm:p-6 max-w-full overflow-hidden">
             <GanttPanelContent
               filteredProjects={businessUnitFilteredProjects}
               selectedBusinessUnit={selectedBusinessUnit}
@@ -289,7 +289,7 @@ export default function Dashboard() {
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={45} minSize={30}>
+        <ResizablePanel defaultSize={45} minSize={30} className="overflow-hidden">
           <ScrollArea className={SCROLL_AREA_CLASSES}>
             <div className="p-4 sm:p-6 space-y-6">
               {renderFinancialChart()}

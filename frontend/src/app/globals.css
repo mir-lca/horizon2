@@ -273,47 +273,99 @@
   overflow-y: auto;
 }
 
-/* Fix Dropdown & Select Opacity - Opaque Background */
+/* Fix Dropdown & Select Opacity - Opaque Background (All Variants) */
+
+/* Radix UI Base Components */
 [role="menu"],
 [role="listbox"],
+[role="dialog"]:not([data-state="closed"]),
 [data-radix-select-content],
 [data-radix-dropdown-menu-content],
-.tr-select-content,
-.tr-dropdown-content {
+[data-radix-popover-content],
+[data-radix-popper-content-wrapper] {
   background-color: hsl(var(--popover)) !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-.dark [role="menu"],
-.dark [role="listbox"],
-.dark [data-radix-select-content],
-.dark [data-radix-dropdown-menu-content],
-.dark .tr-select-content,
-.dark .tr-dropdown-content {
+/* tr-workspace-components Variants */
+.tr-select-content,
+.tr-dropdown-content,
+.tr-popover-content,
+.tr-menu-content {
   background-color: hsl(var(--popover)) !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure nested items inherit opacity */
+[role="menu"] > *,
+[role="listbox"] > *,
+[data-radix-select-content] > *,
+[data-radix-dropdown-menu-content] > * {
   opacity: 1 !important;
 }
 
-/* Fix Dashboard Width Overflow - Prevent Horizontal Scroll */
+/* Dark mode - Ensure consistent dark background */
+.dark [role="menu"],
+.dark [role="listbox"],
+.dark [role="dialog"]:not([data-state="closed"]),
+.dark [data-radix-select-content],
+.dark [data-radix-dropdown-menu-content],
+.dark [data-radix-popover-content],
+.dark [data-radix-popper-content-wrapper],
+.dark .tr-select-content,
+.dark .tr-dropdown-content,
+.dark .tr-popover-content,
+.dark .tr-menu-content {
+  background-color: hsl(var(--popover)) !important;
+  opacity: 1 !important;
+  border: 1px solid hsl(var(--border)) !important; /* Add border for visibility */
+}
+
+/* Fix any portal containers */
+[data-radix-portal] {
+  isolation: isolate; /* Prevent backdrop-filter inheritance */
+}
+
+/* Fix Dashboard Width Overflow - Comprehensive Constraints */
+
+/* Level 1: Document-level constraints */
 body,
 html {
   overflow-x: hidden;
   max-width: 100vw;
 }
 
+/* Level 2: Layout container constraints */
 .container {
   max-width: 100%;
   overflow-x: hidden;
 }
 
-/* Ensure resizable panels don't overflow */
-[data-panel-group-direction="horizontal"] {
-  max-width: 100vw;
-  overflow-x: hidden;
+/* Level 3: ResizablePanel constraints (CRITICAL) */
+[data-panel-group] {
+  overflow: hidden; /* Prevent children from expanding beyond */
 }
 
-[data-panel-group-direction="vertical"] {
-  max-height: 100vh;
-  overflow-y: hidden;
+[data-panel] {
+  overflow: hidden;
+  min-width: 0; /* Allow flex shrinking */
+}
+
+/* Level 4: Card component constraints */
+[data-panel] > * {
+  max-width: 100%;
+  overflow-x: auto; /* Individual cards can scroll if needed */
+}
+
+/* Level 5: Recharts ResponsiveContainer fix */
+.recharts-responsive-container {
+  max-width: 100% !important;
+}
+
+.recharts-wrapper {
+  max-width: 100% !important;
 }

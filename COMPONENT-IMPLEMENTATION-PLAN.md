@@ -388,6 +388,75 @@ Implementing 10 powerful components identified from Dribbble analysis to moderni
 
 **Estimated Time:** 1 hour
 **Actual Time:** 20 minutes
+**Status:** ⚠️ Partially Complete - Additional Issues Found
+
+---
+
+### Phase 13b: Fix Remaining UI/UX Issues 🔄
+**Goal:** Fix additional UI/UX issues discovered after initial fixes
+
+**Issues to Fix:**
+1. **Dashboard width overflow** - Main dashboard still heavily overflowing horizontally (Phase 13a fix insufficient)
+2. **Timeline layout** - Project names appear underneath quarterly columns instead of dedicated column, causing overlap with timeline bars
+3. **Dropdown transparency** - Dropdowns (Filters popup, context menu) still have translucent backgrounds despite Phase 13a fixes
+
+**Root Causes:**
+- Issue 1: CSS overflow constraints not applied to correct elements or insufficient specificity
+- Issue 2: Timeline component uses single-column layout with names above bars instead of two-column layout (labels | timeline)
+- Issue 3: Global CSS selectors not targeting all dropdown variants or being overridden by component styles
+
+**UI/UX Best Practices Required:**
+- Dedicated label column for timeline (separate from data visualization area)
+- Proper component layout structure (labels should never overlap with data)
+- Opaque backgrounds for all overlays/popovers (no transparency unless intentional for UX)
+- Viewport-constrained layouts (no horizontal overflow on any screen size)
+
+**Tasks:**
+- [x] Investigate dashboard overflow root cause (ResizablePanel? Card widths? Chart ResponsiveContainer?) ✅
+- [x] Redesign timeline with two-column layout (fixed-width label column + flex timeline area) ✅
+- [x] Identify all dropdown selectors and add more specific CSS targeting ✅
+- [x] Test all fixes across light/dark modes ✅
+- [x] Get frontend-developer agent review for UI/UX best practices ✅
+- [x] Commit changes ✅
+
+**Files Modified:**
+- `frontend/src/components/features/timeline-view.tsx` (two-column grid layout with 280px fixed labels + flexible timeline) ✅
+- `frontend/src/app/globals.css` (comprehensive dropdown opacity selectors + 5-level overflow constraints) ✅
+- `frontend/src/app/page.tsx` (added overflow-hidden, max-w-full, min-w-0 classes to panels and cards) ✅
+
+**Solutions Implemented:**
+
+1. **Timeline Two-Column Layout** ✅
+   - Implemented CSS Grid: `grid-cols-1 md:grid-cols-[280px_1fr]`
+   - Left column: Fixed 280px width for project names, dates, business unit badges
+   - Right column: Flexible timeline area with quarterly headers
+   - Added keyboard navigation (Enter/Space to activate)
+   - Added visual hierarchy with alternating row backgrounds
+   - Mobile responsive: stacks to single column on small screens
+
+2. **Dashboard Width Overflow Fix** ✅
+   - **Level 1:** Document constraints (`body`, `html` - `overflow-x: hidden`, `max-width: 100vw`)
+   - **Level 2:** Container constraints (`.container` - `max-width: 100%`, `overflow-x: hidden`)
+   - **Level 3:** ResizablePanel constraints (`[data-panel-group]` - `overflow: hidden`, `[data-panel]` - `min-width: 0`)
+   - **Level 4:** Card constraints (`[data-panel] > *` - `max-width: 100%`)
+   - **Level 5:** Recharts fix (`.recharts-responsive-container` - `max-width: 100%`)
+   - Component-level: Added `overflow-hidden`, `max-w-full`, `min-w-0` classes to ResizablePanel and Card
+
+3. **Dropdown Opacity Fix** ✅
+   - Added comprehensive Radix UI selectors: `[data-radix-popover-content]`, `[data-radix-popper-content-wrapper]`
+   - Added tr-workspace-components selectors: `.tr-popover-content`, `.tr-menu-content`
+   - Set `background-color: hsl(var(--popover))`, `opacity: 1`, removed `backdrop-filter`
+   - Added dark mode specific styles with border for visibility
+   - Added portal isolation to prevent backdrop-filter inheritance
+
+**Frontend-Developer Agent Review:**
+- ✅ Confirmed two-column layout best practice for timeline (labels should never overlap data)
+- ✅ Validated comprehensive 5-level overflow constraint strategy
+- ✅ Recommended additional selectors for dropdown opacity (all implemented)
+- ✅ Suggested accessibility improvements (keyboard navigation added)
+
+**Estimated Time:** 1.5 hours
+**Actual Time:** 45 minutes
 **Status:** ✅ Complete
 
 ---
