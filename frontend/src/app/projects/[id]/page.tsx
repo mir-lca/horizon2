@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import { Button } from "tr-workspace-components";
+import { Button } from "@/components/ui";
 import { Project, RevenueEstimate, YearlyFinancialMetric } from "@/lib/types";
 import { useProjectById } from "@/hooks/use-project-data";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -19,6 +19,7 @@ export default function ProjectDetailPage() {
   const params = useParams();
   const projectId = params.id as string;
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [navigating, setNavigating] = useState(false);
 
   const {
     data: projectData,
@@ -43,9 +44,14 @@ export default function ProjectDetailPage() {
     if (!window.confirm("Are you sure you want to delete this project?")) {
       return;
     }
+
     const success = await deleteProject(projectId);
     if (success) {
-      router.push("/projects");
+      setNavigating(true);
+      // Delay to ensure dialog unmounts cleanly before navigation
+      setTimeout(() => {
+        router.replace("/projects");
+      }, 100);
     }
   };
 
@@ -121,14 +127,16 @@ export default function ProjectDetailPage() {
         competences={allCompetences}
       />
 
-      <ProjectEditDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        project={project}
-        onSave={handleSaveProject}
-        businessUnits={allBusinessUnits}
-        dialogTitle="Edit Project"
-      />
+      {!navigating && project && (
+        <ProjectEditDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          project={project}
+          onSave={handleSaveProject}
+          businessUnits={allBusinessUnits}
+          dialogTitle="Edit Project"
+        />
+      )}
     </div>
   );
 }

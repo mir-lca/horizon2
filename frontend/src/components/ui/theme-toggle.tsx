@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "@/lib/theme-provider";
-import { Button } from "tr-workspace-components";
+import { Button } from "@/components/ui";
 import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 

@@ -18,11 +18,11 @@ export async function GET() {
              duration_quarters AS "durationQuarters",
              minimum_duration_quarters AS "minimumDurationQuarters",
              resource_allocations AS "resourceAllocations",
-             total_cost AS "totalCost",
-             sm_cost_percentage AS "smCostPercentage",
-             yearly_sustaining_cost AS "yearlySustainingCost",
+             total_cost::numeric::float8 AS "totalCost",
+             sm_cost_percentage::numeric::float8 AS "smCostPercentage",
+             yearly_sustaining_cost::numeric::float8 AS "yearlySustainingCost",
              yearly_sustaining_costs AS "yearlySustainingCosts",
-             gross_margin_percentage AS "grossMarginPercentage",
+             gross_margin_percentage::numeric::float8 AS "grossMarginPercentage",
              gross_margin_percentages AS "grossMarginPercentages",
              revenue_estimates AS "revenueEstimates",
              status,
@@ -128,7 +128,43 @@ export async function POST(request: NextRequest) {
       ]
     );
 
-    return NextResponse.json({ id: projectId }, { status: 201 });
+    // Fetch the newly created project with all fields
+    const newProject = await query(
+      `
+      SELECT id::text,
+             name,
+             description,
+             business_unit_id::text AS "businessUnitId",
+             business_unit_name AS "businessUnitName",
+             risk_level AS "riskLevel",
+             start_year AS "startYear",
+             start_quarter AS "startQuarter",
+             duration_quarters AS "durationQuarters",
+             minimum_duration_quarters AS "minimumDurationQuarters",
+             resource_allocations AS "resourceAllocations",
+             total_cost::numeric::float8 AS "totalCost",
+             sm_cost_percentage::numeric::float8 AS "smCostPercentage",
+             yearly_sustaining_cost::numeric::float8 AS "yearlySustainingCost",
+             yearly_sustaining_costs AS "yearlySustainingCosts",
+             gross_margin_percentage::numeric::float8 AS "grossMarginPercentage",
+             gross_margin_percentages AS "grossMarginPercentages",
+             revenue_estimates AS "revenueEstimates",
+             status,
+             visible,
+             parent_project_id::text AS "parentProjectId",
+             master_project_id::text AS "masterProjectId",
+             financial_notes AS "financialNotes",
+             maturity_level AS "maturityLevel",
+             color,
+             created_at AS "createdAt",
+             updated_at AS "updatedAt"
+      FROM projects
+      WHERE id = $1
+      `,
+      [projectId]
+    );
+
+    return NextResponse.json(newProject[0], { status: 201 });
   } catch (error) {
     console.error('Error creating project:', error);
     return NextResponse.json(

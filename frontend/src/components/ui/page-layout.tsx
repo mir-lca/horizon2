@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Tabs, TabsList, TabsTrigger } from "tr-workspace-components";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui";
 
 interface PageLayoutProps {
   title: string;

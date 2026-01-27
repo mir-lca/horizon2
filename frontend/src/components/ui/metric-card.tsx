@@ -5,7 +5,7 @@ import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrencyInMillions } from "@/lib/formatting-utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "tr-workspace-components";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui";
 
 /**
  * Unified MetricCard component supporting multiple variants:

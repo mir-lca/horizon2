@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "tr-workspace-components";
+import { Button } from "@/components/ui";
 
 export function ErrorMessage({
   message,

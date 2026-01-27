@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Button, Input, Card, CardHeader, CardTitle, CardContent } from "tr-workspace-components";
+import { Button, Input, Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 import { Project, RevenueEstimate, YearlyFinancialMetric } from "@/lib/types";
 
 interface ProjectFinancialGridProps {

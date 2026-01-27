@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "tr-workspace-components";
+} from "@/components/ui";
 import { Project, Resource, Competence, BusinessUnit, AllocationModifier, ResourceAllocationItem } from "@/lib/types";
 
 interface ProjectResourceAllocationManagerProps {

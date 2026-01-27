@@ -3,7 +3,7 @@
 import React, { memo } from "react";
 import Link from "next/link";
 import { GripVertical, MoreHorizontal, ChevronDown, ChevronRight, Circle, Loader2 } from "lucide-react";
-import { TableCell, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Progress } from "tr-workspace-components";
+import { TableCell, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Progress } from "@/components/ui";
 import { DraggableRow } from "@/components/ui/draggable-row";
 import { Project } from "@/lib/types";
 import { getRiskColorClass, formatCompactNumber } from "@/lib/formatting-utils";

@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge } from "tr-workspace-components";
+import { Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { Bot, CheckCircle, Clock, DollarSign, AlertCircle, Info } from "lucide-react";
 

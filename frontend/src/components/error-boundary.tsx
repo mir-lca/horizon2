@@ -2,7 +2,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
-import { Button } from "tr-workspace-components";
+import { Button } from "@/components/ui";
 
 interface Props {
   children: ReactNode;

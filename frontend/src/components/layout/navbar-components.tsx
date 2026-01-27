@@ -15,7 +15,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "tr-workspace-components";
+} from "@/components/ui";
 
 export function DateRangePicker() {
   const dateRange = useAppStore((state) => state.dateRange);
@@ -29,7 +29,10 @@ export function DateRangePicker() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="min-w-fit h-8">
+        <button
+          type="button"
+          className="tr-button tr-button-outline tr-button-sm min-w-fit h-8 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        >
           <CalendarIcon className="h-4 w-4" />
           <span>
             Q{dateRange.startQuarter} {dateRange.startYear} - Q{dateRange.endQuarter}{" "}
@@ -39,7 +42,7 @@ export function DateRangePicker() {
             className="h-4 w-4 opacity-50 transition-transform"
             style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
           />
-        </Button>
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-4" align="end">
         <div className="space-y-4">

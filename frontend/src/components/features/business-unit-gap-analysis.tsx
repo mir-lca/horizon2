@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { Resource, ResourceAllocation, BusinessUnit, Project } from "@/lib/types";
-import { Card, CardContent } from "tr-workspace-components";
+import { Card, CardContent } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 export interface BusinessUnitGapAnalysisProps {

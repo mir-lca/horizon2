@@ -2,10 +2,10 @@
 
 import React from "react";
 import { X, Filter } from "lucide-react";
-import { Button, Popover, PopoverContent, PopoverTrigger, Badge } from "tr-workspace-components";
+import { Button, Popover, PopoverContent, PopoverTrigger, Badge } from "@/components/ui";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "tr-workspace-components";
-import { Label } from "tr-workspace-components";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
+import { Label } from "@/components/ui";
 import { BusinessUnit } from "@/lib/types";
 
 export interface FilterState {
@@ -87,7 +87,10 @@ export function FilterPanel({
       <div style={{ width: "120px", flexShrink: 0 }}>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="default" className="h-9 w-full gap-1 px-3 justify-start font-normal">
+            <button
+              type="button"
+              className="tr-button tr-button-outline h-9 w-full gap-1 px-3 justify-start font-normal inline-flex items-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+            >
               <Filter className="h-4 w-4 mr-1" />
               <span>Filters</span>
               {activeFilterCount > 0 && (
@@ -95,7 +98,7 @@ export function FilterPanel({
                   {activeFilterCount}
                 </Badge>
               )}
-            </Button>
+            </button>
           </PopoverTrigger>
           <PopoverContent className="w-72 p-4" align="start">
             <div className="space-y-4">

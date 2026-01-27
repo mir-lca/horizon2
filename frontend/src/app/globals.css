@@ -274,6 +274,12 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* Fix Dialog Overlay/Backdrop - Semi-transparent black */
+[data-radix-dialog-overlay],
+.fixed.inset-0.z-50 {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
 /* Fix Dialog Positioning - Centered Modal */
 [role="dialog"][data-state="open"],
 [data-radix-dialog-content],
@@ -296,7 +302,7 @@
 [data-radix-dropdown-menu-content],
 [data-radix-popover-content],
 [data-radix-popper-content-wrapper] {
-  background-color: hsl(var(--popover)) !important;
+  background-color: var(--popover) !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -307,7 +313,7 @@
 .tr-dropdown-content,
 .tr-popover-content,
 .tr-menu-content {
-  background-color: hsl(var(--popover)) !important;
+  background-color: var(--popover) !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -333,9 +339,9 @@
 .dark .tr-dropdown-content,
 .dark .tr-popover-content,
 .dark .tr-menu-content {
-  background-color: hsl(var(--popover)) !important;
+  background-color: var(--popover) !important;
   opacity: 1 !important;
-  border: 1px solid hsl(var(--border)) !important; /* Add border for visibility */
+  border: 1px solid var(--border) !important; /* Add border for visibility */
 }
 
 /* Fix any portal containers */

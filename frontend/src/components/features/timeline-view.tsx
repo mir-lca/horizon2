@@ -117,25 +117,25 @@ export function TimelineView({
               return (
                 <div
                   key={index}
-                  className="flex-1 border-r border-[var(--border)] last:border-r-0 text-center relative min-w-[3rem]"
+                  className="flex-1 border-r border-[var(--border)] last:border-r-0 text-center relative min-w-[4rem]"
                 >
                   {isFirstQuarter && (
-                    <div className="text-xs text-[var(--muted-foreground)] absolute top-0 left-1">
+                    <div className="text-sm text-[var(--muted-foreground)] absolute top-0 left-1">
                       Q1
                     </div>
                   )}
                   {quarter === 2 && (
-                    <div className="text-xs text-[var(--muted-foreground)] absolute top-0 left-1/2 -translate-x-1/2 opacity-50">
+                    <div className="text-sm text-[var(--muted-foreground)] absolute top-0 left-1/2 -translate-x-1/2 opacity-50">
                       Q2
                     </div>
                   )}
                   {quarter === 3 && (
-                    <div className="text-xs text-[var(--muted-foreground)] absolute top-0 left-1/2 -translate-x-1/2 opacity-50">
+                    <div className="text-sm text-[var(--muted-foreground)] absolute top-0 left-1/2 -translate-x-1/2 opacity-50">
                       Q3
                     </div>
                   )}
                   {quarter === 4 && (
-                    <div className="text-xs text-[var(--muted-foreground)] absolute top-0 right-1 opacity-50">
+                    <div className="text-sm text-[var(--muted-foreground)] absolute top-0 right-1 opacity-50">
                       Q4
                     </div>
                   )}
@@ -150,7 +150,7 @@ export function TimelineView({
               className="absolute bottom-0 top-0 w-0.5 bg-red-500 z-10"
               style={{ left: `${todayPosition}%` }}
             >
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded whitespace-nowrap">
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-red-500 text-white text-sm font-semibold rounded whitespace-nowrap">
                 Today
               </div>
             </div>

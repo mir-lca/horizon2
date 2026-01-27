@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Button } from "tr-workspace-components";
+import { Button } from "@/components/ui";
 import { Project, BusinessUnit, RiskFactor } from "@/lib/types";
 import { useProjectSortConfig, useProjectFilterState, useLocalStorage } from "@/lib/storage-utils";
 import { useProjectData } from "@/hooks/use-project-data";
@@ -29,7 +29,7 @@ import { ProjectRow } from "@/components/features/project-row";
 import { ProjectEditDialog } from "@/components/forms/project-edit-dialog";
 import { DropZone } from "@/components/ui/draggable-row";
 import { FilterPanel, FilterState } from "@/components/features/filter-panel";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "tr-workspace-components";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui";
 import { calculateIRRForProjects } from "@/lib/financial-calculations";
 import { useAppStore } from "@/store/app-store";
 import { PageLayout } from "@/components/ui/page-layout";
@@ -554,7 +554,7 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {currentEditProject && (
+      {editDialogOpen && currentEditProject && (
         <ProjectEditDialog
           open={editDialogOpen}
           onOpenChange={setEditDialogOpen}
@@ -565,7 +565,7 @@ export default function ProjectsPage() {
         />
       )}
 
-      {currentEditProject && (
+      {createDialogOpen && currentEditProject && (
         <ProjectEditDialog
           open={createDialogOpen}
           onOpenChange={setCreateDialogOpen}

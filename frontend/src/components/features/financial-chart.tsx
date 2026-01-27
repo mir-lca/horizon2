@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import { Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Legend } from "recharts";
 import { formatCurrency } from "@/lib/formatting-utils";
-import { Card, CardContent, CardHeader, CardTitle } from "tr-workspace-components";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 import { Project } from "@/lib/types";
 import { calculateProjectRevenueForYear, calculateProjectSustainingCosts } from "@/lib/financial-calculations";
 

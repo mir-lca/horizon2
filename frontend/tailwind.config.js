@@ -18,11 +18,13 @@ module.exports = {
     },
     extend: {
       spacing: {
-        'xs': 'var(--space-xs)',
-        'sm': 'var(--space-sm)',
-        'md': 'var(--space-md)',
-        'lg': 'var(--space-lg)',
-        'xl': 'var(--space-xl)',
+        'xs': 'var(--space-xs)',     // 4px - custom token
+        'sm': 'var(--space-sm)',     // 8px - custom token
+        'md': 'var(--space-md)',     // 16px - custom token
+        'lg': 'var(--space-lg)',     // 24px - custom token
+        'xl': 'var(--space-xl)',     // 32px - custom token
+        // Default Tailwind scale (0-96) is preserved via extend
+        // So p-4 (16px), p-6 (24px), p-8 (32px) still work
       },
       colors: {
         border: "hsl(var(--border))",

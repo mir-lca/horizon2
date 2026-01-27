@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "tr-workspace-components";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 import { Project } from "@/lib/types";
 import { formatDuration } from "@/lib/date-utils";
 

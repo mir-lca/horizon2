@@ -1,4 +1,22 @@
 // Pure UI components (reusable, no business logic)
+
+// shadcn/ui components
+export * from "./button";
+export * from "./card";
+export * from "./table";
+export * from "./badge";
+export * from "./tabs";
+export * from "./switch";
+export * from "./label";
+export * from "./tooltip";
+export * from "./dropdown-menu";
+export * from "./popover";
+export * from "./select";
+export * from "./input";
+export * from "./progress";
+export * from "./dialog";
+
+// Custom UI components
 export * from "./checkbox";
 export { DraggableRow, DropZone } from "./draggable-row";
 export { ErrorMessage } from "./error-message";

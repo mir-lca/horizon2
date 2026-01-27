@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, Suspense } from "react";
 import type { PropsWithChildren } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "tr-workspace-components";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 import { useProjectData } from "@/hooks/use-project-data";
 import { Project } from "@/lib/types";
 import { formatCurrencyInMillions } from "@/lib/formatting-utils";
@@ -32,9 +32,9 @@ import {
 } from "@/lib/financial-calculations";
 import { FinancialChart } from "@/components/features/financial-chart";
 import useMediaQuery from "@/hooks/use-media-query";
-import { Switch } from "tr-workspace-components";
-import { Label } from "tr-workspace-components";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "tr-workspace-components";
+import { Switch } from "@/components/ui";
+import { Label } from "@/components/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui";
 
 interface ProjectGanttPanelProps {
   projects: Project[];
@@ -77,10 +77,10 @@ const GanttPanelContent = ({
   onProjectClick: (projectId: string) => void;
 }) => (
   <Card className="h-full flex flex-col overflow-hidden max-w-full">
-    <CardHeader className="px-4 sm:px-6 py-3 flex-shrink-0">
+    <CardHeader className="flex-shrink-0">
       <CardTitle className="text-base sm:text-lg font-medium">Project Timeline</CardTitle>
     </CardHeader>
-    <CardContent className="flex-1 min-h-0 min-w-0 p-4 sm:p-6 overflow-auto">
+    <CardContent className="flex-1 min-h-0 min-w-0 pt-12 overflow-y-auto">
       <Suspense fallback={<LoadingState message="Loading timeline..." />}>
         <TimelineView
           projects={filteredProjects}
@@ -225,12 +225,12 @@ export default function Dashboard() {
 
     return (
       <Card className="overflow-hidden w-full max-w-full">
-        <CardHeader className="px-4 sm:px-6 py-3">
+        <CardHeader className="pb-4">
           <CardTitle className="text-base sm:text-lg font-medium">Financial Forecast</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="h-full flex flex-col">
-            <div className="flex-1 min-h-0" style={{ height: isMobile ? "20rem" : "28rem" }}>
+            <div className="flex-shrink-0 px-6 pb-4" style={{ height: isMobile ? "18rem" : "22rem" }}>
               {aggregateProject ? (
                 <FinancialChart
                   projects={aggregateProject}
@@ -244,7 +244,7 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            <div className="flex-shrink-0 border-t dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 -mx-4 -mb-4 px-4 py-3">
+            <div className="flex-shrink-0 border-t dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 px-6 py-3">
               <div className="grid grid-cols-3 gap-4 text-xs">
                 <div className="text-center">
                   <div className="text-neutral-500 dark:text-neutral-400 font-medium mb-1">Add. Revenue</div>
@@ -297,7 +297,7 @@ export default function Dashboard() {
               {renderFinancialChart()}
 
               <Card className="w-full max-w-full">
-                <CardHeader className="px-4 sm:px-6 py-3 flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle className="text-base sm:text-lg font-medium">Resource Gaps</CardTitle>
                     <div className="text-xs text-muted-foreground">By competence and quarter</div>

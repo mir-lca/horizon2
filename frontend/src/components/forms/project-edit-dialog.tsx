@@ -11,8 +11,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "tr-workspace-components";
-import { Button, Label, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "tr-workspace-components";
+} from "@/components/ui";
+import { Button, Label, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
 
 interface ProjectEditDialogProps {
   open: boolean;
@@ -187,7 +187,7 @@ export function ProjectEditDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-3 pt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

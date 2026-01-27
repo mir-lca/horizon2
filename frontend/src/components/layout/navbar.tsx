@@ -13,7 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "tr-workspace-components";
+} from "@/components/ui";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LoadingState } from "@/components/ui/loading-state";
 import { BusinessUnitSelector, DateRangePicker } from "./navbar-components";
@@ -115,10 +115,13 @@ export function Navbar() {
           <div className="md:hidden">
             <DropdownMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <button
+                  type="button"
+                  className="tr-button tr-button-ghost inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10"
+                  aria-label="Toggle Menu"
+                >
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle Menu</span>
-                </Button>
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
                 <DropdownMenuLabel>Navigation</DropdownMenuLabel>

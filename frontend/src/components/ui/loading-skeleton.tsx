@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader } from "tr-workspace-components";
-import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "tr-workspace-components";
+import { Card, CardContent, CardHeader } from "@/components/ui";
+import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "@/components/ui";
 
 /**
  * Base skeleton component for animated loading placeholders
