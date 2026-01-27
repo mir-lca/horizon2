@@ -353,6 +353,45 @@ Implementing 10 powerful components identified from Dribbble analysis to moderni
 
 ---
 
+### Phase 13: Fix UI/UX Issues 🔄
+**Goal:** Fix multiple UI/UX issues in dashboard and dialogs
+
+**Issues to Fix:**
+1. **Dashboard width overflow** - Components stretch beyond available width
+2. **Dialog positioning** - Project creation popup appears in top-left instead of centered
+3. **Dropdown transparency** - Dropdowns have translucent backgrounds instead of opaque
+4. **Project sort crash** - `TypeError: undefined is not an object (evaluating 'a.name.localeCompare')` when creating new project
+
+**Root Causes:**
+- Issue 1: Missing container width constraints on dashboard
+- Issue 2: Dialog component missing centering styles
+- Issue 3: Dropdown components missing opaque background
+- Issue 4: Sort function doesn't handle undefined/empty names during project creation
+
+**Tasks:**
+- [x] Analyze dashboard layout and add width constraints ✅
+- [x] Fix dialog centering styles ✅
+- [x] Add opaque backgrounds to all dropdowns ✅
+- [x] Add null checks to sort function ✅
+- [x] Test all fixes ✅
+- [x] Commit changes ✅
+
+**Files Modified:**
+- `frontend/src/app/globals.css` (dialog centering, dropdown opacity, width overflow) ✅
+- `frontend/src/app/projects/page.tsx` (sort function null safety) ✅
+
+**Solutions Implemented:**
+1. **Sort Crash Fix:** Added null coalescing to `a.name` in sort function (`(a.name || "").localeCompare(b.name || "")`)
+2. **Dialog Centering:** Added fixed positioning with transform translate(-50%, -50%) for all dialog elements
+3. **Dropdown Opacity:** Set `background-color: hsl(var(--popover))` with `opacity: 1` for all dropdown/select components
+4. **Width Overflow:** Added `overflow-x: hidden` and `max-width: 100vw` constraints to body, container, and resizable panels
+
+**Estimated Time:** 1 hour
+**Actual Time:** 20 minutes
+**Status:** ✅ Complete
+
+---
+
 ## 📊 Progress Tracking
 
 ### Summary
@@ -360,7 +399,7 @@ Implementing 10 powerful components identified from Dribbble analysis to moderni
 - **Completed:** 6 (KPI Card, Status Dot, Stacked Bar, Ring Chart, Tooltips, Timeline View)
 - **In Progress:** 0
 - **Not Started:** 4 (Filter Chips, Tabs, Row Actions, Alert Banner)
-- **Bug Fixes:** 1 (HTML Hydration Errors)
+- **Bug Fixes:** 2 (HTML Hydration Errors, UI/UX Issues)
 
 ### Status Legend
 - ✅ Completed

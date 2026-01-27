@@ -206,7 +206,7 @@ export default function ProjectsPage() {
       const direction = sortConfig?.direction || "asc";
 
       const sorted = [...projectsToSort].sort((a, b) => {
-        if (key === "name") return a.name.localeCompare(b.name);
+        if (key === "name") return (a.name || "").localeCompare(b.name || "");
         if (key === "status") return (a.status || "").localeCompare(b.status || "");
         if (key === "startYear") return (a.startYear || 0) - (b.startYear || 0);
         if (key === "totalCost") return (a.totalCost || 0) - (b.totalCost || 0);
