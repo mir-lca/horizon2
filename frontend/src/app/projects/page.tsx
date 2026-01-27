@@ -639,10 +639,25 @@ export default function ProjectsPage() {
                   <TableHead className="text-right">Cost</TableHead>
                   <TableHead>Revenue</TableHead>
                   <TableHead>Maturity</TableHead>
-                  <TableHead>
+                  <TableHead
+                    aria-sort={
+                      sortConfig?.key === "riskLevel"
+                        ? sortConfig.direction === "asc"
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                    }
+                  >
                     <button
                       type="button"
                       className="flex items-center gap-1"
+                      aria-label={`Sort by risk level ${
+                        sortConfig?.key === "riskLevel"
+                          ? sortConfig.direction === "asc"
+                            ? "descending"
+                            : "ascending"
+                          : "ascending"
+                      }`}
                       onClick={() =>
                         setSortConfig({
                           key: "riskLevel",
@@ -650,7 +665,7 @@ export default function ProjectsPage() {
                         })
                       }
                     >
-                      Risk <ArrowUpDown className="h-3 w-3" />
+                      Risk <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
                     </button>
                   </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
