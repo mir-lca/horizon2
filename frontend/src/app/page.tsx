@@ -50,11 +50,11 @@ interface ProjectGanttPanelProps {
   ) => void;
 }
 
-const SvarGanttPanel = dynamic(
-  () => import("@/components/features/svar-gantt-panel").then((mod) => ({ default: mod.SvarGanttPanel })),
+const TimelineView = dynamic(
+  () => import("@/components/features/timeline-view").then((mod) => ({ default: mod.TimelineView })),
   {
     ssr: false,
-    loading: () => <LoadingState message="Loading Gantt chart..." />,
+    loading: () => <LoadingState message="Loading timeline..." />,
   }
 );
 
@@ -77,15 +77,15 @@ const GanttPanelContent = ({
     <CardHeader className="px-4 sm:px-6 py-3 flex-shrink-0">
       <CardTitle className="text-base sm:text-lg font-medium">Project Timeline</CardTitle>
     </CardHeader>
-    <CardContent className="flex-1 min-h-0 p-0">
-      <Suspense fallback={<LoadingState message="Loading Gantt chart..." />}>
-        <SvarGanttPanel
+    <CardContent className="flex-1 min-h-0 p-4 sm:p-6 overflow-auto">
+      <Suspense fallback={<LoadingState message="Loading timeline..." />}>
+        <TimelineView
           projects={filteredProjects}
           selectedBusinessUnit={selectedBusinessUnit}
           timeline={{ startYear: dateRange.startYear, endYear: dateRange.endYear }}
-          onProjectChange={async (updatedProjects) => {
-            // React Query will automatically refetch after mutation completes
-            await onSaveProjects(updatedProjects);
+          onProjectClick={(projectId) => {
+            // Navigate to project detail page
+            window.location.href = `/projects/${projectId}`;
           }}
         />
       </Suspense>
