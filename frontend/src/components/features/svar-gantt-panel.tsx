@@ -92,7 +92,9 @@ export function SvarGanttPanel({
 
   // Convert Project[] to ITask[]
   const tasks: ITask[] = useMemo(() => {
-    return filteredProjects.map((project) => {
+    console.log('SvarGanttPanel - filteredProjects:', filteredProjects.length, filteredProjects);
+
+    const convertedTasks = filteredProjects.map((project) => {
       const startMonth = quarterToMonth(project.startQuarter);
       const startDate = new Date(project.startYear, startMonth, 1);
       const endDate = calculateEndDate(project.startYear, project.startQuarter, project.durationQuarters);
@@ -101,7 +103,7 @@ export function SvarGanttPanel({
       const hasChildren = filteredProjects.some(p => (p as any).parentProjectId === project.id);
       const type = hasChildren ? "summary" : "task";
 
-      return {
+      const task: ITask = {
         id: project.id,
         text: project.name,
         start: startDate,
@@ -109,14 +111,24 @@ export function SvarGanttPanel({
         duration: project.durationQuarters,
         progress: 0, // Could map from project data if available
         type: type,
-        parent: (project as any).parentProjectId || "0",
         open: true, // Keep tasks expanded by default
         // Custom fields
         status: project.status,
         businessUnit: project.businessUnitName,
         visible: project.visible !== false,
       };
+
+      // Only add parent if the project has one
+      const parentProjectId = (project as any).parentProjectId;
+      if (parentProjectId) {
+        task.parent = parentProjectId;
+      }
+
+      return task;
     });
+
+    console.log('SvarGanttPanel - convertedTasks:', convertedTasks.length, convertedTasks);
+    return convertedTasks;
   }, [filteredProjects]);
 
   // Configure scales for quarterly view
@@ -125,7 +137,7 @@ export function SvarGanttPanel({
       {
         unit: "year" as const,
         step: 1,
-        format: "yyyy",
+        format: (date: Date) => date.getFullYear().toString(),
       },
       {
         unit: "quarter" as const,
@@ -229,7 +241,7 @@ export function SvarGanttPanel({
     const startYear = timeline?.startYear || 2020;
     const endYear = timeline?.endYear || 2030;
 
-    return {
+    const ganttConfig = {
       start: new Date(startYear, 0, 1),
       end: new Date(endYear, 11, 31),
       lengthUnit: "quarter",
@@ -240,7 +252,12 @@ export function SvarGanttPanel({
       zoom: false,
       readonly: false,
     };
+
+    console.log('SvarGanttPanel - config:', ganttConfig);
+    return ganttConfig;
   }, [timeline, scales, columns]);
+
+  console.log('SvarGanttPanel - Rendering with tasks:', tasks.length);
 
   return (
     <div className={cn("h-full flex flex-col", COMPONENT_BORDER_CLASSES)}>
