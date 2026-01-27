@@ -98,7 +98,7 @@ export function TimelineView({
         <div className="hidden md:block border-r border-[var(--border)] pr-4" />
 
         {/* RIGHT: Timeline columns */}
-        <div className="relative min-w-0">
+        <div className="relative min-w-0 pt-10">
           {/* Year Headers - Clean and Bold */}
           <div className="flex border-b-2 border-[var(--border)] pb-2 mb-2">
             {years.map((year) => (
@@ -117,7 +117,7 @@ export function TimelineView({
               return (
                 <div
                   key={index}
-                  className="flex-1 border-r border-[var(--border)] last:border-r-0 text-center relative min-w-0"
+                  className="flex-1 border-r border-[var(--border)] last:border-r-0 text-center relative min-w-[3rem]"
                 >
                   {isFirstQuarter && (
                     <div className="text-xs text-[var(--muted-foreground)] absolute top-0 left-1">

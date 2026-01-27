@@ -882,47 +882,191 @@ const { filteredProjects, activeFilterCount } = useProjectFilters(
 
 ---
 
-### Phase 18: Fix Spacing and Padding Inconsistencies ⏳
-**Goal:** Investigate and fix spacing/padding issues where cards and popups ignore padding rules
+### Phase 18: Fix UI Layout and Spacing Issues 🔄
+**Goal:** Fix multiple UI layout issues identified in dashboard and timeline components
 
-**Issues to Fix:**
-1. **Cards ignoring padding** - Card components not respecting padding classes
-2. **Popups/dialogs spacing** - Dialog and popover components have inconsistent padding
-3. **Layout spacing** - Gaps between components inconsistent across dashboard
-4. **Conflicting CSS** - Possible negative margins or absolute positioning overriding padding
+**Priority Order (High to Low):**
+1. **Redundant Widgets** - Remove duplicate metric cards (high impact, simple fix)
+2. **Card/Popup Padding** - Increase padding globally (high impact, affects entire app)
+3. **Timeline Today Indicator** - Fix vertical cutoff (medium impact, visual bug)
+4. **Timeline Quarter Spacing** - Improve quarter label spacing (low impact, minor adjustment)
 
-**Investigation Steps:**
-- [ ] Audit all Card components for padding classes and actual rendered spacing
-- [ ] Check Dialog/Popover components for padding overrides
-- [ ] Inspect for conflicting CSS (negative margins, absolute positioning)
-- [ ] Review Radix UI default styles that might override custom padding
-- [ ] Check for `!important` rules affecting spacing
-- [ ] Test across different viewport sizes
+---
 
-**Potential Root Causes:**
-- Radix UI default styles overriding Tailwind padding classes
-- CSS specificity issues with component styles
-- Missing padding classes on wrapper elements
-- Conflicting box model calculations (border-box vs content-box)
+#### Issue 1: Redundant Metric Widgets (Priority 1)
+
+**Problem:** Individual widgets on main screen (Total Revenue, IRR, Project Cost) duplicate information in Financial Chart embedded widgets.
+
+**Root Cause:**
+- Lines 298-316 in `page.tsx` display standalone metric cards
+- Lines 247-272 already show same metrics embedded in Financial Chart footer
+- Wastes vertical space and creates visual redundancy
+
+**Solution:**
+- Remove redundant metric cards grid (lines 298-316)
+- Increase chart height from 20rem to 28rem (desktop) to utilize freed space
+- Resource Gaps card moves up visually
 
 **Tasks:**
-- [ ] Document current spacing issues with screenshots
-- [ ] Identify which components are affected
-- [ ] Fix Card component padding (CardHeader, CardContent, CardFooter)
-- [ ] Fix Dialog/Popover padding inconsistencies
-- [ ] Add consistent spacing utilities to design tokens
-- [ ] Test all dialogs and cards for proper padding
-- [ ] Commit changes
+- [ ] Delete metric cards grid at lines 298-316 in `page.tsx`
+- [ ] Increase chart height at line 233: `height: isMobile ? "20rem" : "28rem"`
+- [ ] Test chart embedded widgets display properly at new height
+- [ ] Verify responsive behavior
 
-**Files to Investigate:**
-- `frontend/src/components/ui/card.tsx`
-- `frontend/src/components/ui/dialog.tsx`
-- `frontend/src/app/globals.css` (Radix overrides)
-- `frontend/src/styles/components.css`
+**Files to Modify:**
+- `frontend/src/app/page.tsx` (lines 233, 298-316)
 
-**Estimated Time:** 45 minutes
+---
+
+#### Issue 2: Insufficient Card/Popup Padding (Priority 2)
+
+**Problem:** Most cards and popups don't have enough inner padding (tight spacing throughout app).
+
+**Root Cause:**
+- tr-workspace-components Card defaults: minimal padding
+- Current values: 1.5rem (24px) desktop, 1rem (16px) mobile
+- Dialog/Popover components also have tight spacing
+
+**Solution (Preferred): Global CSS Padding Standards**
+Add consistent padding standards in `globals.css`:
+
+```css
+/* Enhanced Card Padding */
+[data-card] {
+  --card-padding: 2rem; /* 32px */
+  --card-header-padding: 1.5rem; /* 24px */
+}
+
+.tr-card, [role="region"][data-card] {
+  padding: var(--card-padding);
+}
+
+.tr-card-header, [data-card-header] {
+  padding: var(--card-header-padding);
+  padding-bottom: 1rem;
+}
+
+.tr-card-content, [data-card-content] {
+  padding: var(--card-padding);
+  padding-top: 1rem;
+}
+
+/* Popover and Dialog improvements */
+[role="dialog"], [data-radix-dialog-content], .tr-dialog-content {
+  padding: 2rem !important;
+}
+
+[data-radix-popover-content], .tr-popover-content {
+  padding: 1.5rem !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  [data-card] {
+    --card-padding: 1.25rem;
+    --card-header-padding: 1rem;
+  }
+  [role="dialog"], [data-radix-dialog-content] {
+    padding: 1.5rem !important;
+  }
+}
+```
+
+**Tasks:**
+- [ ] Add enhanced padding CSS to `globals.css` (end of file)
+- [ ] Test all Card components have comfortable padding
+- [ ] Test Dialog/Popover padding improvements
+- [ ] Verify responsive behavior on mobile (375px), tablet (768px), desktop (1440px)
+- [ ] Check dark mode appearance
+
+**Files to Modify:**
+- `frontend/src/app/globals.css` (add at line 392+)
+
+---
+
+#### Issue 3: Timeline "Today" Indicator Cut Off (Priority 3)
+
+**Problem:** "Today" indicator label is cut off vertically in timeline component.
+
+**Root Cause:**
+- Label positioned at `-top-8` (line 153 in `timeline-view.tsx`)
+- Parent container has no `padding-top`, causing vertical clipping
+
+**Solution (Preferred): Add Padding to Timeline Container**
+
+```tsx
+// Line 101, change from:
+<div className="relative min-w-0">
+
+// To:
+<div className="relative min-w-0 pt-10">
+```
+
+**Alternative Solution: Move Label Inside Timeline**
+If padding affects layout:
+
+```tsx
+// Lines 149-156, change label position from -top-8 to top-2:
+<div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded whitespace-nowrap shadow-md">
+  Today
+</div>
+```
+
+**Tasks:**
+- [ ] Add `pt-10` to timeline container (line 101)
+- [ ] Test "Today" label fully visible
+- [ ] Verify no layout shifts in surrounding components
+- [ ] If issues, switch to alternative solution
+
+**Files to Modify:**
+- `frontend/src/components/features/timeline-view.tsx` (line 101 or lines 149-156)
+
+---
+
+#### Issue 4: Timeline Quarter Spacing (Priority 4)
+
+**Problem:** Quarters in timeline component don't have enough space for labels.
+
+**Root Cause:**
+- Quarter cells use `flex-1` which creates equal spacing
+- No minimum width constraint causes label overlap at smaller widths
+
+**Solution: Add Minimum Width**
+
+```tsx
+// Line 120, change from:
+<div className="flex-1 border-r border-[var(--border)] last:border-r-0 text-center relative min-w-0">
+
+// To:
+<div className="flex-1 border-r border-[var(--border)] last:border-r-0 text-center relative min-w-[3rem]">
+```
+
+**Tasks:**
+- [ ] Add `min-w-[3rem]` to quarter cells (line 120)
+- [ ] Test quarter labels don't overlap at various screen widths
+- [ ] Test timeline scrolls horizontally if needed
+- [ ] Verify responsive behavior
+
+**Files to Modify:**
+- `frontend/src/components/features/timeline-view.tsx` (line 120)
+
+---
+
+**Overall Testing Checklist:**
+- [ ] Financial Chart displays embedded metrics clearly
+- [ ] Chart height increased to fill available space
+- [ ] Resource Gaps card moved up visually
+- [ ] Timeline quarter labels don't overlap
+- [ ] "Today" indicator label fully visible
+- [ ] All Card components have comfortable padding
+- [ ] Dialog/Popover padding improved
+- [ ] No horizontal scrolling on standard viewports
+- [ ] Responsive on mobile (375px), tablet (768px), desktop (1440px)
+- [ ] Dark mode appearance verified
+
+**Estimated Time:** 60 minutes (4 issues × 15 min avg)
 **Actual Time:** TBD
-**Status:** ⏳ Not Started
+**Status:** 🔄 In Progress
 
 ---
 

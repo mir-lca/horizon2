@@ -230,7 +230,7 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="h-full flex flex-col">
-            <div className="flex-1 min-h-0" style={{ height: isMobile ? "16rem" : "20rem" }}>
+            <div className="flex-1 min-h-0" style={{ height: isMobile ? "20rem" : "28rem" }}>
               {aggregateProject ? (
                 <FinancialChart
                   projects={aggregateProject}
@@ -295,25 +295,6 @@ export default function Dashboard() {
           <ScrollArea className={SCROLL_AREA_CLASSES}>
             <div className="p-4 sm:p-6 space-y-6 w-full max-w-full">
               {renderFinancialChart()}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
-                <FinancialRangeCard
-                  title="Total Revenue"
-                  valueLow={formatCurrencyInMillions(visibleUnfundedMetrics.revenue.lowTotal)}
-                  valueHigh={formatCurrencyInMillions(visibleUnfundedMetrics.revenue.highTotal)}
-                  helperText="Revenue from visible initiatives"
-                />
-                <PercentageMetricCard title="IRR" value={currentIRR} helperText="Portfolio IRR" />
-                <FinancialMetricCard
-                  title="Total Sustaining Cost"
-                  value={calculateTotalSustainingCosts(visibleProjects)}
-                  subtitle="Annual sustaining costs"
-                />
-                <FinancialMetricCard
-                  title="Hiring Investment"
-                  value={hiringInvestment}
-                  subtitle="Cost to close resource gaps"
-                />
-              </div>
 
               <Card className="w-full max-w-full">
                 <CardHeader className="px-4 sm:px-6 py-3 flex flex-row items-center justify-between">

@@ -389,3 +389,56 @@ html {
   max-width: 100% !important;
   display: block !important; /* Override display: table */
 }
+
+/* ============================================================================
+   ENHANCED CARD AND DIALOG PADDING
+   ============================================================================ */
+
+/* Override tr-workspace-components Card defaults for better spacing */
+[data-card] {
+  --card-padding: 2rem; /* 32px */
+  --card-header-padding: 1.5rem; /* 24px */
+}
+
+.tr-card,
+[role="region"][data-card] {
+  padding: var(--card-padding);
+}
+
+.tr-card-header,
+[data-card-header] {
+  padding: var(--card-header-padding);
+  padding-bottom: 1rem; /* 16px */
+}
+
+.tr-card-content,
+[data-card-content] {
+  padding: var(--card-padding);
+  padding-top: 1rem; /* 16px */
+}
+
+/* Popover and Dialog padding improvements */
+[role="dialog"],
+[data-radix-dialog-content],
+.tr-dialog-content {
+  padding: 2rem !important; /* 32px */
+}
+
+[data-radix-popover-content],
+.tr-popover-content {
+  padding: 1.5rem !important; /* 24px */
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  [data-card] {
+    --card-padding: 1.25rem; /* 20px */
+    --card-header-padding: 1rem; /* 16px */
+  }
+
+  [role="dialog"],
+  [data-radix-dialog-content],
+  .tr-dialog-content {
+    padding: 1.5rem !important; /* 24px */
+  }
+}
