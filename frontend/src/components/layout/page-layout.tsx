@@ -30,7 +30,7 @@ export interface PageLayoutProps {
   activeTab?: string;
   /** Optional description text below header */
   description?: string;
-  /** Optional additional CSS classes for the container */
+  /** Optional additional CSS classes for the outer container (layout behavior only) */
   className?: string;
   /** Optional additional CSS classes for the header */
   headerClassName?: string;
@@ -108,7 +108,7 @@ export function PageLayout({
   tabs,
   activeTab,
   description,
-  className = "container mx-auto px-4 py-6 max-w-7xl",
+  className,
   headerClassName,
   contentClassName,
 }: PageLayoutProps) {
@@ -116,57 +116,61 @@ export function PageLayout({
   if (tabs) {
     return (
       <div className={cn("h-[calc(100vh-4rem)] overflow-hidden flex flex-col", className)}>
-        <Tabs
-          value={tabs.value}
-          onValueChange={tabs.onValueChange}
-          className="h-full flex flex-col min-h-0"
-        >
-          <div className={cn("flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6", headerClassName)}>
-            <div className="flex-1">
-              <PageHeader {...header} />
+        <div className="max-w-7xl mx-auto w-full px-4 md:px-6 lg:px-8 h-full flex flex-col min-h-0">
+          <Tabs
+            value={tabs.value}
+            onValueChange={tabs.onValueChange}
+            className="h-full flex flex-col min-h-0 py-6"
+          >
+            <div className={cn("flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6", headerClassName)}>
+              <div className="flex-1">
+                <PageHeader {...header} />
+              </div>
+              <div className="flex items-center gap-4 flex-shrink-0">
+                <TabsList className="inline-flex w-auto">
+                  {tabs.items.map((item) => (
+                    <TabsTrigger key={item.value} value={item.value}>
+                      {item.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {header.actions && <div className="flex gap-2">{header.actions}</div>}
+              </div>
             </div>
-            <div className="flex items-center gap-4 flex-shrink-0">
-              <TabsList className="inline-flex w-auto">
-                {tabs.items.map((item) => (
-                  <TabsTrigger key={item.value} value={item.value}>
-                    {item.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              {header.actions && <div className="flex gap-2">{header.actions}</div>}
-            </div>
-          </div>
 
-          {activeTab && tabs.items.find((item) => item.value === activeTab)?.description && (
-            <div className="text-sm text-muted-foreground mb-4">
-              {tabs.items.find((item) => item.value === activeTab)?.description}
-            </div>
-          )}
+            {activeTab && tabs.items.find((item) => item.value === activeTab)?.description && (
+              <div className="text-sm text-muted-foreground mb-4">
+                {tabs.items.find((item) => item.value === activeTab)?.description}
+              </div>
+            )}
 
-          {description && (
-            <div className="mb-4 text-sm text-muted-foreground">
-              <p>{description}</p>
-            </div>
-          )}
+            {description && (
+              <div className="mb-4 text-sm text-muted-foreground">
+                <p>{description}</p>
+              </div>
+            )}
 
-          <div className={cn("flex-1 min-h-0", contentClassName)}>{children}</div>
-        </Tabs>
+            <div className={cn("flex-1 min-h-0", contentClassName)}>{children}</div>
+          </Tabs>
+        </div>
       </div>
     );
   }
 
   // Standard layout without tabs
   return (
-    <div className={className}>
-      <PageHeader {...header} className={cn("mb-6", headerClassName)} />
+    <div className={cn("w-full", className)}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6">
+        <PageHeader {...header} className={cn("mb-6", headerClassName)} />
 
-      {description && (
-        <div className="mb-4 text-sm text-muted-foreground">
-          <p>{description}</p>
-        </div>
-      )}
+        {description && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            <p>{description}</p>
+          </div>
+        )}
 
-      <div className={contentClassName}>{children}</div>
+        <div className={contentClassName}>{children}</div>
+      </div>
     </div>
   );
 }
@@ -183,7 +187,7 @@ export function PageLayoutLegacy({
   actions,
   tabs,
   activeTab,
-  className = "container mx-auto px-4 py-3 h-[calc(100vh-4rem)] overflow-hidden flex flex-col",
+  className,
 }: {
   title: string;
   subtitle?: string;

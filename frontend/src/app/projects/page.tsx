@@ -452,7 +452,6 @@ export default function ProjectsPage() {
           </Button>
         ),
       }}
-      className="container mx-auto px-4 py-3 h-[calc(100vh-4rem)] overflow-hidden flex flex-col max-w-7xl"
     >
       <div className="flex flex-col min-h-0 flex-1">
         <div className="mb-6 flex items-center gap-3">
