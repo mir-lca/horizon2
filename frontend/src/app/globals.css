@@ -369,3 +369,10 @@ html {
 .recharts-wrapper {
   max-width: 100% !important;
 }
+
+/* Level 6: ScrollArea content wrapper fix (Radix UI creates wrapper div) */
+[data-radix-scroll-area-viewport] > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important; /* Override display: table */
+}
