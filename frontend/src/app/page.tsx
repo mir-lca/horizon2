@@ -50,8 +50,8 @@ interface ProjectGanttPanelProps {
   ) => void;
 }
 
-const InteractiveGanttPanel = dynamic(
-  () => import("@/components/features/interactive-gantt-panel").then((mod) => ({ default: mod.InteractiveGanttPanel })),
+const SvarGanttPanel = dynamic(
+  () => import("@/components/features/svar-gantt-panel").then((mod) => ({ default: mod.SvarGanttPanel })),
   {
     ssr: false,
     loading: () => <LoadingState message="Loading Gantt chart..." />,
@@ -79,7 +79,7 @@ const GanttPanelContent = ({
     </CardHeader>
     <CardContent className="flex-1 min-h-0 p-0">
       <Suspense fallback={<LoadingState message="Loading Gantt chart..." />}>
-        <InteractiveGanttPanel
+        <SvarGanttPanel
           projects={filteredProjects}
           selectedBusinessUnit={selectedBusinessUnit}
           timeline={{ startYear: dateRange.startYear, endYear: dateRange.endYear }}
