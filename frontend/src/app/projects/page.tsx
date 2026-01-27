@@ -624,6 +624,11 @@ export default function ProjectsPage() {
               },
             }}
           >
+            {/* Root Drop Zone - Outside Table for Valid HTML */}
+            <DropZone id="root" className="bg-muted/10 border-b border-dashed border-muted-foreground/20 mb-2 text-xs text-muted-foreground text-center py-2">
+              Drop here to make project a master project
+            </DropZone>
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -652,15 +657,13 @@ export default function ProjectsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <DropZone id="root" className="bg-muted/10">
-                  {filteredProjects.length > 0 ? renderProjects(filteredProjects) : (
-                    <TableRow>
-                      <td colSpan={9} className="text-center py-6 text-muted-foreground">
-                        No projects match the current filters
-                      </td>
-                    </TableRow>
-                  )}
-                </DropZone>
+                {filteredProjects.length > 0 ? renderProjects(filteredProjects) : (
+                  <TableRow>
+                    <td colSpan={9} className="text-center py-6 text-muted-foreground">
+                      No projects match the current filters
+                    </td>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
 

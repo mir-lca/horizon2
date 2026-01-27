@@ -315,6 +315,44 @@ Implementing 10 powerful components identified from Dribbble analysis to moderni
 
 ---
 
+### Phase 12: Fix HTML Hydration Errors in Projects Table ✅
+**Goal:** Fix invalid DOM nesting in drag-and-drop table implementation
+
+**Root Cause:**
+- `DropZone` component renders `<div>` inside `<tbody>`
+- HTML spec: `<tbody>` can only contain `<tr>` elements
+- Structure: `<tbody><div><tr></tr></div></tbody>` ← INVALID
+- Causes: Hydration errors, React warnings, semantic HTML violations
+
+**Tasks:**
+- [x] Analyze HTML structure and identify root cause ✅
+- [x] Remove DropZone wrapper from TableBody ✅
+- [x] Make TableBody itself the droppable area ✅
+- [x] Test drag-and-drop still works ✅
+- [x] Verify no hydration errors ✅
+- [x] Commit fix ✅
+
+**Files Modified:**
+- `frontend/src/app/projects/page.tsx` ✅
+
+**Technical Solution:**
+- Removed `<DropZone>` wrapper component from table
+- Applied `useDroppable` hook directly to table structure
+- Maintained drag-and-drop functionality with valid HTML
+- Preserved "root" drop zone behavior
+
+**Errors Fixed:**
+- ✅ `<div>` cannot be a child of `<tbody>`
+- ✅ `<tbody>` cannot contain a nested `<div>`
+- ✅ `<tr>` cannot be a child of `<div>`
+- ✅ `<div>` cannot contain a nested `<tr>`
+
+**Estimated Time:** 30 minutes
+**Actual Time:** 15 minutes
+**Blockers:** None
+
+---
+
 ## 📊 Progress Tracking
 
 ### Summary
@@ -322,6 +360,7 @@ Implementing 10 powerful components identified from Dribbble analysis to moderni
 - **Completed:** 6 (KPI Card, Status Dot, Stacked Bar, Ring Chart, Tooltips, Timeline View)
 - **In Progress:** 0
 - **Not Started:** 4 (Filter Chips, Tabs, Row Actions, Alert Banner)
+- **Bug Fixes:** 1 (HTML Hydration Errors)
 
 ### Status Legend
 - ✅ Completed
