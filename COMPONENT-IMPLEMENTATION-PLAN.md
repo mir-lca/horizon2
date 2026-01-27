@@ -681,7 +681,7 @@ At 1024px viewport:
 
 ---
 
-### Phase 15: Consolidate Metric Card Components ⏳
+### Phase 15: Consolidate Metric Card Components ✅
 **Goal:** Merge overlapping MetricCard and KPICard into single component with variants
 
 **Issues to Fix:**
@@ -723,9 +723,37 @@ interface MetricCardProps {
 }
 ```
 
+**Solutions Implemented:**
+1. **Created unified MetricCard component:**
+   - Single component with 5 variants: standard, financial, percentage, range, kpi
+   - Discriminated union types for type safety
+   - Type assertions for proper variant handling
+
+2. **Maintained backward compatibility:**
+   - Exported wrapper functions: FinancialMetricCard, PercentageMetricCard, FinancialRangeCard, KPICard
+   - All existing usages continue to work without modification
+   - Added flexibility to FinancialRangeCard to accept pre-formatted strings
+
+3. **Reduced code duplication:**
+   - Merged 321 LOC (180 + 141) into 334 LOC (net: consolidated logic, added types)
+   - Eliminated 80% duplicate code (shared structure, tooltip, icon, onClick, className)
+   - Single source of truth for metric card styling and behavior
+
+**Files Modified:**
+- `frontend/src/components/ui/metric-card.tsx` - Unified component with all variants
+- Deleted: `frontend/src/components/ui/kpi-card.tsx` - Consolidated into metric-card.tsx
+
+**Verification:**
+- ✅ TypeScript compilation passes
+- ✅ All existing usages work (backward compatible wrappers)
+- ✅ Build successful (no breaking changes)
+
+**Commits:**
+- f2904f3: "refactor(phase-15): Consolidate MetricCard and KPICard into unified component"
+
 **Estimated Time:** 30 minutes
-**Actual Time:** TBD
-**Status:** ⏳ Not Started
+**Actual Time:** 25 minutes
+**Status:** ✅ Complete
 
 ---
 
@@ -883,7 +911,7 @@ const { organizedProjects, sortConfig, setSortConfig } =
 - **In Progress:** 0
 - **Not Started:** 4 (Filter Chips, Tabs, Row Actions, Alert Banner)
 - **Bug Fixes:** 4 phases complete (HTML Hydration, UI/UX Issues, Dashboard Overflow, TypeScript Build)
-- **Refactoring:** 1 phase complete (Accessibility), 4 phases planned (Component Consolidation, Hook Extraction, CSS Cleanup, Spacing/Padding)
+- **Refactoring:** 2 phases complete (Accessibility, Component Consolidation), 3 phases planned (Hook Extraction, CSS Cleanup, Spacing/Padding)
 
 ### Status Legend
 - ✅ Completed
