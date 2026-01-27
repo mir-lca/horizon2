@@ -226,9 +226,8 @@ export function TimelineView({
                       "absolute inset-y-0 left-0 transition-all",
                       project.status === "completed" && "bg-green-500",
                       project.status === "active" && "bg-blue-500",
-                      project.status === "planning" && "bg-purple-500",
-                      project.status === "on-hold" && "bg-yellow-500",
-                      project.status === "cancelled" && "bg-red-500"
+                      project.status === "funded" && "bg-purple-500",
+                      project.status === "unfunded" && "bg-yellow-500"
                     )}
                     style={{ width: `${barStyle.completion}%` }}
                   />
@@ -247,9 +246,8 @@ export function TimelineView({
                       )`,
                       backgroundColor: project.status === "completed" ? "rgba(34, 197, 94, 0.3)" :
                                      project.status === "active" ? "rgba(59, 130, 246, 0.3)" :
-                                     project.status === "planning" ? "rgba(168, 85, 247, 0.3)" :
-                                     project.status === "on-hold" ? "rgba(251, 191, 36, 0.3)" :
-                                     "rgba(239, 68, 68, 0.3)"
+                                     project.status === "funded" ? "rgba(168, 85, 247, 0.3)" :
+                                     "rgba(251, 191, 36, 0.3)"
                     }}
                   />
 

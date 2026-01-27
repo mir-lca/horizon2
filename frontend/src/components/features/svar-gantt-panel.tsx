@@ -236,7 +236,6 @@ export function SvarGanttPanel({
       cellWidth: 40,
       cellHeight: 40,
       zoom: false,
-      readonly: false,
     };
 
     console.log('SvarGanttPanel - config:', ganttConfig);
@@ -315,7 +314,6 @@ export function SvarGanttPanel({
           cellWidth={config.cellWidth}
           cellHeight={config.cellHeight}
           zoom={config.zoom}
-          readonly={config.readonly}
           init={handleInit}
           onupdatetask={handleUpdateTask}
           onselecttask={handleSelectTask}
