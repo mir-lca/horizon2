@@ -61,7 +61,7 @@
 
 ---
 
-### Attempt 4: Remove Custom Scales (Commit: TBD)
+### Attempt 4: Remove Custom Scales (Commit: fbedcd9)
 **Date:** 2026-01-27 09:15 AM
 **Hypothesis:** Custom scales format functions incompatible with SVAR's internal processing
 **Analysis of Latest Logs:**
