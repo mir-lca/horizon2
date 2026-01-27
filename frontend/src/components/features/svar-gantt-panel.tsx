@@ -128,6 +128,12 @@ export function SvarGanttPanel({
     });
 
     console.log('SvarGanttPanel - convertedTasks:', convertedTasks.length, convertedTasks);
+
+    // Log first task in detail to inspect structure
+    if (convertedTasks.length > 0) {
+      console.log('SvarGanttPanel - First task detail:', JSON.stringify(convertedTasks[0], null, 2));
+    }
+
     return convertedTasks;
   }, [filteredProjects]);
 
@@ -301,6 +307,7 @@ export function SvarGanttPanel({
       <div className="flex-1 min-h-0">
         <Gantt
           tasks={tasks}
+          links={[]}
           scales={scales}
           start={config.start}
           end={config.end}
