@@ -562,6 +562,197 @@ At 1024px viewport:
 
 ---
 
+### Phase 14: Fix Critical Accessibility Issues ⏳
+**Goal:** Address WCAG 2.1 AA compliance violations identified in frontend audit
+
+**Issues to Fix:**
+1. **Navigation pattern** - `window.location.href` instead of Next.js router (breaks SPA, no loading state)
+2. **Missing ARIA labels** - Sortable table headers lack `aria-sort` and `aria-label` attributes
+3. **Focus management** - Loading states don't announce to screen readers (`role="status"`, `aria-live`)
+4. **Color-only indicators** - Status colors need additional patterns/icons for colorblind users
+
+**Root Causes:**
+- Issue 1: Direct DOM manipulation instead of framework router
+- Issue 2: Interactive elements missing accessibility attributes
+- Issue 3: Dynamic content changes not announced to assistive technology
+- Issue 4: Reliance on color alone violates WCAG 1.4.1
+
+**Tasks:**
+- [ ] Replace `window.location.href` with Next.js `useRouter().push()`
+- [ ] Add `aria-sort` attributes to sortable table columns
+- [ ] Add descriptive `aria-label` to sort buttons
+- [ ] Add `role="status"` and `aria-live="polite"` to LoadingState
+- [ ] Add screen reader text (`sr-only` class) for loading messages
+- [ ] Test with keyboard navigation (tab order, enter/space)
+- [ ] Commit changes
+
+**Files to Modify:**
+- `frontend/src/app/page.tsx` (replace window.location.href)
+- `frontend/src/app/projects/page.tsx` (add ARIA to table headers)
+- `frontend/src/components/ui/loading-state.tsx` (add role and aria-live)
+
+**Acceptance Criteria:**
+- ✅ Timeline navigation works via Next.js router with loading state
+- ✅ Table columns announce sort direction to screen readers
+- ✅ Loading states announce to VoiceOver/NVDA
+- ✅ All interactive elements have descriptive labels
+
+**Estimated Time:** 1 hour
+**Actual Time:** TBD
+**Status:** ⏳ Not Started
+
+---
+
+### Phase 15: Consolidate Metric Card Components ⏳
+**Goal:** Merge overlapping MetricCard and KPICard into single component with variants
+
+**Issues to Fix:**
+1. **Code duplication** - MetricCard (180 LOC) and KPICard (141 LOC) have 80% overlap
+2. **Inconsistent usage** - Some places use MetricCard, others use FinancialMetricCard, others use KPICard
+3. **Poor API** - 10+ optional props making component hard to understand
+
+**Root Cause:**
+- Components evolved separately without design system
+- No clear variant pattern established
+- Multiple specialized components created ad-hoc
+
+**Tasks:**
+- [ ] Analyze prop overlap between MetricCard, KPICard, FinancialMetricCard, PercentageMetricCard
+- [ ] Design unified API with variant prop (`variant: 'standard' | 'financial' | 'percentage' | 'range'`)
+- [ ] Create single MetricCard component with variant handling
+- [ ] Update all usages in page.tsx and other files
+- [ ] Remove old component files
+- [ ] Test all metric card displays
+- [ ] Commit changes
+
+**Files to Modify:**
+- `frontend/src/components/ui/metric-card.tsx` (consolidate all variants)
+- `frontend/src/app/page.tsx` (update usages)
+- Delete: `frontend/src/components/ui/kpi-card.tsx`
+
+**New API Design:**
+```typescript
+interface MetricCardProps {
+  title: string;
+  variant: 'standard' | 'financial' | 'percentage' | 'range';
+  value?: number;
+  valueLow?: number;
+  valueHigh?: number;
+  subtitle?: string;
+  helperText?: string;
+  trend?: { value: number; direction: 'up' | 'down' };
+  sparklineData?: number[];
+}
+```
+
+**Estimated Time:** 30 minutes
+**Actual Time:** TBD
+**Status:** ⏳ Not Started
+
+---
+
+### Phase 16: Extract Custom Hooks for Business Logic ⏳
+**Goal:** Move complex business logic from page components into reusable custom hooks
+
+**Issues to Fix:**
+1. **Page complexity** - projects/page.tsx is 698 lines with 12+ state variables
+2. **Code duplication** - Filter logic repeated across pages
+3. **Testability** - Business logic embedded in JSX makes testing difficult
+
+**Root Cause:**
+- Business logic written inline in page components during initial development
+- No separation between UI and data transformation
+
+**Tasks:**
+- [ ] Create `useProjectFilters(projects, initialFilters)` hook
+  - Encapsulate filter state (status, businessUnit, riskLevel, search)
+  - Provide filtered projects and filter handlers
+  - Extract from projects/page.tsx lines 228-291
+- [ ] Create `useProjectHierarchy(projects, sortConfig)` hook
+  - Encapsulate tree organization logic
+  - Extract from projects/page.tsx lines 293-350
+- [ ] Update page components to use new hooks
+- [ ] Test hooks in isolation
+- [ ] Commit changes
+
+**Files to Create:**
+- `frontend/src/hooks/use-project-filters.ts`
+- `frontend/src/hooks/use-project-hierarchy.ts`
+
+**Files to Modify:**
+- `frontend/src/app/projects/page.tsx` (use new hooks)
+
+**Hook API Design:**
+```typescript
+// useProjectFilters
+const { filteredProjects, filters, updateFilter, clearFilters } =
+  useProjectFilters(projects, { status: 'all', search: '' });
+
+// useProjectHierarchy
+const { organizedProjects, sortConfig, setSortConfig } =
+  useProjectHierarchy(projects, { key: 'name', direction: 'asc' });
+```
+
+**Estimated Time:** 45 minutes
+**Actual Time:** TBD
+**Status:** ⏳ Not Started
+
+---
+
+### Phase 17: CSS Architecture Cleanup ⏳
+**Goal:** Consolidate color definitions to single source of truth and remove duplicates
+
+**Issues to Fix:**
+1. **Color duplication** - Same colors defined in HSL (globals.css) and hex (design-tokens.css)
+2. **Inconsistent usage** - Some use CSS variables, some use Tailwind classes, some use hardcoded hex
+3. **CSS conflicts** - Multiple `!important` rules fighting Radix defaults
+
+**Root Cause:**
+- CSS evolved over multiple phases without consolidation
+- No clear hierarchy established (tokens → components → framework)
+
+**Tasks:**
+- [ ] Audit all color definitions across CSS files
+- [ ] Choose single format (recommend HSL for theming flexibility)
+- [ ] Move all colors to `design-tokens.css` as canonical source
+- [ ] Remove duplicate color definitions from `globals.css`
+- [ ] Replace `!important` rules with CSS layers where possible
+- [ ] Document CSS import order and architecture
+- [ ] Test light/dark mode still works
+- [ ] Commit changes
+
+**Files to Modify:**
+- `frontend/src/styles/design-tokens.css` (consolidate all colors)
+- `frontend/src/app/globals.css` (remove color duplicates, add CSS layers)
+
+**CSS Architecture (Target State):**
+```
+1. design-tokens.css → Colors, spacing, typography (HSL format)
+2. components.css → Reusable component classes (.metric-card, .status-badge)
+3. globals.css → Framework integration only (Tailwind directives, Radix overrides)
+```
+
+**CSS Layers Pattern:**
+```css
+@layer tokens, components, framework;
+
+@layer tokens {
+  :root { --primary: oklch(...); }
+}
+
+@layer framework {
+  [data-radix-select-content] {
+    background-color: hsl(var(--popover));
+  }
+}
+```
+
+**Estimated Time:** 30 minutes
+**Actual Time:** TBD
+**Status:** ⏳ Not Started
+
+---
+
 ## 📊 Progress Tracking
 
 ### Summary
@@ -569,7 +760,8 @@ At 1024px viewport:
 - **Completed:** 6 (KPI Card, Status Dot, Stacked Bar, Ring Chart, Tooltips, Timeline View)
 - **In Progress:** 0
 - **Not Started:** 4 (Filter Chips, Tabs, Row Actions, Alert Banner)
-- **Bug Fixes:** 2 (HTML Hydration Errors, UI/UX Issues)
+- **Bug Fixes:** 3 phases complete (HTML Hydration, UI/UX Issues, Dashboard Overflow)
+- **Refactoring:** 4 phases planned (Accessibility, Component Consolidation, Hook Extraction, CSS Cleanup)
 
 ### Status Legend
 - ✅ Completed

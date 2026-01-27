@@ -11,13 +11,19 @@ export function LoadingState({
 }) {
   return (
     <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
       className={cn(
         "flex flex-col items-center justify-center gap-3 text-muted-foreground",
         showBackdrop && "fixed inset-0 z-50 bg-background/70 backdrop-blur-sm"
       )}
     >
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/40 border-t-primary" />
-      <div className="text-sm">{message}</div>
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/40 border-t-primary" aria-hidden="true" />
+      <div className="text-sm">
+        <span className="sr-only">{message}</span>
+        <span aria-hidden="true">{message}</span>
+      </div>
     </div>
   );
 }

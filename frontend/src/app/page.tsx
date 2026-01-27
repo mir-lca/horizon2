@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from "react";
 import type { PropsWithChildren } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "tr-workspace-components";
 import { useProjectData } from "@/hooks/use-project-data";
 import { Project } from "@/lib/types";
@@ -67,11 +68,13 @@ const GanttPanelContent = ({
   selectedBusinessUnit,
   dateRange,
   onSaveProjects,
+  onProjectClick,
 }: {
   filteredProjects: Project[];
   selectedBusinessUnit: string;
   dateRange: any;
   onSaveProjects: (projects: Project[]) => Promise<void>;
+  onProjectClick: (projectId: string) => void;
 }) => (
   <Card className="h-full flex flex-col overflow-hidden max-w-full">
     <CardHeader className="px-4 sm:px-6 py-3 flex-shrink-0">
@@ -83,10 +86,7 @@ const GanttPanelContent = ({
           projects={filteredProjects}
           selectedBusinessUnit={selectedBusinessUnit}
           timeline={{ startYear: dateRange.startYear, endYear: dateRange.endYear }}
-          onProjectClick={(projectId) => {
-            // Navigate to project detail page
-            window.location.href = `/projects/${projectId}`;
-          }}
+          onProjectClick={onProjectClick}
         />
       </Suspense>
     </CardContent>
@@ -94,6 +94,7 @@ const GanttPanelContent = ({
 );
 
 export default function Dashboard() {
+  const router = useRouter();
   const dateRange = useAppStore((state) => state.dateRange);
   const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
 
@@ -285,6 +286,7 @@ export default function Dashboard() {
               selectedBusinessUnit={selectedBusinessUnit}
               dateRange={dateRange}
               onSaveProjects={handleSaveProjects}
+              onProjectClick={(projectId) => router.push(`/projects/${projectId}`)}
             />
           </div>
         </ResizablePanel>
