@@ -5,6 +5,8 @@ import { Button } from "tr-workspace-components";
 import { Project, BusinessUnit, RiskFactor } from "@/lib/types";
 import { useProjectSortConfig, useProjectFilterState, useLocalStorage } from "@/lib/storage-utils";
 import { useProjectData } from "@/hooks/use-project-data";
+import { useProjectHierarchy, ProjectWithChildren } from "@/hooks/useProjectHierarchy";
+import { useProjectFilters } from "@/hooks/useProjectFilters";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { toast } from "sonner";
@@ -31,10 +33,6 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "tr-workspace
 import { calculateIRRForProjects } from "@/lib/financial-calculations";
 import { useAppStore } from "@/store/app-store";
 import { PageLayout } from "@/components/ui/page-layout";
-
-interface ProjectWithChildren extends Project {
-  childProjects?: ProjectWithChildren[];
-}
 
 export default function ProjectsPage() {
   const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
@@ -167,140 +165,9 @@ export default function ProjectsPage() {
     }));
   };
 
-  const organizedProjects = useMemo((): ProjectWithChildren[] => {
-    const projectMap = new Map<string, ProjectWithChildren>();
-
-    projectsList.forEach((project) => {
-      projectMap.set(project.id, { ...project, childProjects: [] });
-    });
-
-    const topLevelProjects: ProjectWithChildren[] = [];
-
-    projectsList.forEach((project) => {
-      const projectWithChildren = projectMap.get(project.id);
-      if (!projectWithChildren) return;
-
-      if (project.parentProjectId) {
-        const masterId = project.parentProjectId;
-        const masterProject = projectMap.get(masterId);
-
-        if (masterProject) {
-          if (!masterProject.childProjects) {
-            masterProject.childProjects = [];
-          }
-          masterProject.childProjects.push(projectWithChildren);
-        } else {
-          const cleanedProject = {
-            ...projectWithChildren,
-            parentProjectId: undefined,
-          };
-          topLevelProjects.push(cleanedProject);
-        }
-      } else {
-        topLevelProjects.push(projectWithChildren);
-      }
-    });
-
-    const sortProjects = (projectsToSort: ProjectWithChildren[]): ProjectWithChildren[] => {
-      const key = sortConfig?.key || "name";
-      const direction = sortConfig?.direction || "asc";
-
-      const sorted = [...projectsToSort].sort((a, b) => {
-        if (key === "name") return (a.name || "").localeCompare(b.name || "");
-        if (key === "status") return (a.status || "").localeCompare(b.status || "");
-        if (key === "startYear") return (a.startYear || 0) - (b.startYear || 0);
-        if (key === "totalCost") return (a.totalCost || 0) - (b.totalCost || 0);
-        return 0;
-      });
-
-      return direction === "desc" ? sorted.reverse() : sorted;
-    };
-
-    topLevelProjects.forEach((project) => {
-      if (project.childProjects) {
-        project.childProjects = sortProjects(project.childProjects);
-      }
-    });
-
-    return sortProjects(topLevelProjects);
-  }, [projectsList, sortConfig]);
-
-  const applyFilters = useCallback(
-    (projectsToFilter: ProjectWithChildren[]) => {
-      let filtered = [...projectsToFilter];
-
-      if (filters.status && filters.status.length > 0) {
-        filtered = filtered.filter((project) => filters.status?.includes(project.status));
-      }
-
-      if (filters.funding && filters.funding.length > 0) {
-        filtered = filtered.filter((project) => {
-          const isFunded = project.funded ?? (project.status === "funded" || project.status === "active");
-          return filters.funding?.includes(isFunded ? "funded" : "unfunded");
-        });
-      }
-
-      if (filters.maturityLessThan100) {
-        filtered = filtered.filter((project) => {
-          const completedFields = [
-            !!project.riskLevel,
-            project.durationQuarters > 0,
-            !!project.startYear,
-            (project.totalCost || 0) > 0,
-            (project.revenueEstimates?.length || 0) > 0,
-          ];
-          const completed = completedFields.filter(Boolean).length;
-          const maturity = Math.round((completed / completedFields.length) * 100);
-          return maturity < 100;
-        });
-      }
-
-      if (filters.businessUnitId) {
-        filtered = filtered.filter((project) => project.businessUnitId === filters.businessUnitId);
-      }
-
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (project) =>
-            project.name?.toLowerCase().includes(query) ||
-            project.description?.toLowerCase().includes(query) ||
-            project.businessUnitName?.toLowerCase().includes(query)
-        );
-      }
-
-      filtered = filtered.map((project) => {
-        if (project.childProjects && project.childProjects.length > 0) {
-          const filteredChildren = project.childProjects.filter((child) => {
-            if (filters.status && filters.status.length > 0) {
-              return filters.status.includes(child.status);
-            }
-            return true;
-          });
-          return {
-            ...project,
-            childProjects: filteredChildren,
-          };
-        }
-        return project;
-      });
-
-      return filtered;
-    },
-    [filters, searchQuery]
-  );
-
-  const filteredProjects = useMemo(() => applyFilters(organizedProjects), [organizedProjects, applyFilters]);
-
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    if (filters.status && filters.status.length > 0) count += filters.status.length;
-    if (filters.funding && filters.funding.length > 0) count += filters.funding.length;
-    if (filters.maturityLessThan100) count += 1;
-    if (filters.businessUnitId) count += 1;
-    if (searchQuery) count += 1;
-    return count;
-  }, [filters, searchQuery]);
+  // Use custom hooks for hierarchy and filtering
+  const organizedProjects = useProjectHierarchy(projectsList, sortConfig);
+  const { filteredProjects, activeFilterCount } = useProjectFilters(organizedProjects, filters, searchQuery);
 
   const handleClearFilters = () => {
     setFilters({});
