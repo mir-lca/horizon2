@@ -104,7 +104,7 @@ export default function PortfolioPage() {
           <TabsTrigger value="scenarios">Scenarios</TabsTrigger>
         </TabsList>
         <TabsContent value="gantt">
-          <SvarGanttPanel projects={projects as Project[]} />
+          <SvarGanttPanel projects={projects as Project[]} onProjectChange={() => {}} />
         </TabsContent>
         <TabsContent value="scenarios">
           <ScenariosTab />

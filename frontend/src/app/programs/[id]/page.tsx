@@ -129,7 +129,7 @@ export default function ProgramDetailPage() {
         <TabsContent value="schedule" className="space-y-6">
           <div className="border rounded-lg p-4">
             {childProjects.length > 0 ? (
-              <SvarGanttPanel projects={childProjects} />
+              <SvarGanttPanel projects={childProjects} onProjectChange={() => {}} />
             ) : (
               <p className="text-sm text-muted-foreground italic text-center py-8">
                 No projects linked to this program yet.
