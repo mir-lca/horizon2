@@ -6,7 +6,7 @@ import { Button, Popover, PopoverContent, PopoverTrigger, Badge } from "@/compon
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
 import { Label } from "@/components/ui";
-import { BusinessUnit } from "@/lib/types";
+import { OrgDataBusinessUnit } from "@/lib/types";
 
 export interface FilterState {
   status?: string[];
@@ -18,7 +18,7 @@ export interface FilterState {
 interface FilterPanelProps {
   filters: FilterState;
   onFilterChange: (filters: FilterState) => void;
-  businessUnits: BusinessUnit[];
+  businessUnits: OrgDataBusinessUnit[];
   activeFilterCount: number;
   onClearFilters: () => void;
 }

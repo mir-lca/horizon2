@@ -147,3 +147,53 @@ export interface Resource {
   allocatedQuarters?: number;
   notes?: string;
 }
+
+/**
+ * Reparent a node in the project hierarchy (closure table update)
+ */
+export async function reparentNode(nodeId: string, newParentId: string | null): Promise<void> {
+  const client = await getClient();
+  try {
+    await client.query('BEGIN');
+
+    // Delete all ancestry rows where descendant is in nodeId's subtree
+    // and ancestor is NOT in nodeId's subtree
+    await client.query(
+      `DELETE FROM project_ancestry
+       WHERE descendant_id IN (
+         SELECT descendant_id FROM project_ancestry WHERE ancestor_id = $1
+       )
+       AND ancestor_id NOT IN (
+         SELECT descendant_id FROM project_ancestry WHERE ancestor_id = $1
+       )`,
+      [nodeId]
+    );
+
+    if (newParentId) {
+      // Re-insert: for each ancestor of newParent, connect to each descendant of node
+      await client.query(
+        `INSERT INTO project_ancestry (ancestor_id, descendant_id, depth)
+         SELECT p.ancestor_id, c.descendant_id, p.depth + c.depth + 1
+         FROM project_ancestry p
+         CROSS JOIN project_ancestry c
+         WHERE p.descendant_id = $1
+           AND c.ancestor_id = $2
+         ON CONFLICT DO NOTHING`,
+        [newParentId, nodeId]
+      );
+    }
+
+    // Update parent_project_id on the node itself
+    await client.query(
+      'UPDATE projects SET parent_project_id = $1, updated_at = now() WHERE id = $2',
+      [newParentId, nodeId]
+    );
+
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}

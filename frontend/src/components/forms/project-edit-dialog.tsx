@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Project, RiskFactor, BusinessUnit } from "@/lib/types";
+import { Project, RiskFactor } from "@/lib/types";
 import { toast } from "sonner";
 import { getQuarterOptions, getYearOptions } from "@/lib/date-utils";
 import {
@@ -13,13 +13,13 @@ import {
   DialogTitle,
 } from "@/components/ui";
 import { Button, Label, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
+import { BusinessUnitSelector } from "@/components/forms/business-unit-selector";
 
 interface ProjectEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   project: Project | null;
   onSave: (project: Project) => Promise<void>;
-  businessUnits: BusinessUnit[];
   dialogTitle?: string;
 }
 
@@ -35,7 +35,6 @@ export function ProjectEditDialog({
   onOpenChange,
   project: initialProject,
   onSave,
-  businessUnits,
   dialogTitle = "Edit Project",
 }: ProjectEditDialogProps) {
   const [project, setProject] = React.useState<Project | null>(initialProject);
@@ -62,12 +61,6 @@ export function ProjectEditDialog({
     setProject((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
-  const handleBusinessUnitChange = (value: string) => {
-    const businessUnit = businessUnits.find((bu) => String(bu.id) === value);
-    handleChange("businessUnitId", value);
-    handleChange("businessUnitName", businessUnit ? businessUnit.name : "");
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px]">
@@ -90,18 +83,15 @@ export function ProjectEditDialog({
 
           <div className="grid grid-cols-[140px_1fr] items-center gap-4">
             <Label className="text-right">Business Unit</Label>
-            <Select value={String(project.businessUnitId || "")} onValueChange={handleBusinessUnitChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Business Unit" />
-              </SelectTrigger>
-              <SelectContent>
-                {businessUnits.map((bu) => (
-                  <SelectItem key={bu.id} value={String(bu.id)}>
-                    {bu.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex-1">
+              <BusinessUnitSelector
+                value={project.businessUnitId}
+                onChange={(buId) => handleChange("businessUnitId", buId)}
+                label=""
+                placeholder="Select Business Unit"
+                required
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-[140px_1fr] items-center gap-4">

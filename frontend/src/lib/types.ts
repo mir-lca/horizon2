@@ -51,11 +51,19 @@ export interface ResourceAllocationItem {
   modifier?: AllocationModifier;
 }
 
+export interface ProjectDocument {
+  id: string;
+  title: string;
+  url: string;
+  type: 'sharepoint' | 'link' | 'file';
+  addedAt: string;
+  addedBy?: string;
+}
+
 export interface Project extends CosmosDocument {
   name: string;
   description?: string;
-  businessUnitId: string;
-  businessUnitName?: string;
+  businessUnitId: string; // Stores org data BU ID (e.g., "ur", "mir", "robotics")
   riskLevel: RiskFactor;
   startYear: number;
   startQuarter: number;
@@ -77,9 +85,24 @@ export interface Project extends CosmosDocument {
   financialNotes?: string;
   maturityLevel?: number;
   color?: string;
+  spendRecords?: SpendRecord[];
+  costBreakdown?: Record<string, any>;
+  documents?: ProjectDocument[];
   createdAt: string;
   updatedAt: string;
   type: "project";
+}
+
+export interface EmployeeReference {
+  employeeId: string;
+  email: string;
+  displayName: string;
+  jobTitle?: string;
+  businessUnit?: string;
+  businessUnitId?: string;
+  division?: string;
+  allocationFte: number;
+  linkedAt: string;
 }
 
 export interface Resource extends CosmosDocument {
@@ -88,11 +111,12 @@ export interface Resource extends CosmosDocument {
   competenceName: string;
   quantity: number;
   yearlyWage: number;
-  businessUnitId: string;
-  businessUnitName: string;
+  businessUnitId: string; // Stores org data BU ID (e.g., "ur", "mir")
   skills?: string[];
   name?: string;
   isAI?: boolean;
+  employeeReferences?: EmployeeReference[]; // Optional employee linking
+  archivedAt?: string;
   type: "resource";
 }
 
@@ -107,11 +131,49 @@ export interface ResourceAllocation extends CosmosDocument {
   type: "resource-allocation";
 }
 
-export interface BusinessUnit extends CosmosDocument {
+// REMOVED: BusinessUnit interface - BUs are now fetched from org data, not stored in Horizon
+// Use OrgDataBusinessUnit instead (see below)
+
+/**
+ * Org Data Types - These represent data from org-data-sync-function
+ */
+
+export interface OrgDataEmployee {
+  id: string;
+  email: string;
+  displayName: string;
+  givenName: string;
+  surname: string;
+  jobTitle: string;
+  division: string;
+  divisionId: string;
+  businessUnit: string;
+  businessUnitId: string;
+  functionCategory: string;
+  managerId: string;
+  managerEmail: string;
+}
+
+export interface OrgDataFunction {
+  id: string;
   name: string;
-  description?: string;
-  parentUnitId?: string;
-  type: "business-unit";
+  headcount: number;
+}
+
+export interface OrgDataBusinessUnit {
+  id: string; // e.g., "ur", "mir"
+  name: string; // e.g., "Universal Robots (UR)"
+  headcount: number;
+  division: string;
+  divisionId: string;
+  functions: OrgDataFunction[];
+}
+
+export interface OrgDataDivision {
+  id: string; // e.g., "robotics"
+  name: string; // e.g., "Robotics"
+  headcount: number;
+  businessUnits: OrgDataBusinessUnit[];
 }
 
 export interface Competence extends CosmosDocument {
@@ -150,7 +212,7 @@ export interface AnalysisTimeframe extends CosmosDocument {
   description?: string;
 }
 
-export interface Scenario extends CosmosDocument {
+export interface LegacyScenario extends CosmosDocument {
   name: string;
   description: string;
   projectId: string;
@@ -214,4 +276,178 @@ export interface FeedbackItem extends CosmosDocument {
   sourcePage?: string;
   voterIds?: string[];
   type: "feedback-item";
+}
+
+// PPM extended types
+
+export interface Milestone {
+  id: string;
+  projectId: string;
+  name: string;
+  dueDate?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'at_risk';
+  description?: string;
+  owner?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Risk {
+  id: string;
+  entityType: string;
+  entityId: string;
+  title: string;
+  description?: string;
+  probability?: 'low' | 'medium' | 'high';
+  impact?: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'mitigated' | 'closed' | 'accepted';
+  owner?: string;
+  mitigation?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkflowDefinition {
+  id: string;
+  name: string;
+  states: string[];
+  transitions: Array<{ from: string; to: string; label: string }>;
+}
+
+export interface WorkflowInstance {
+  id: string;
+  definitionId: string;
+  entityType: string;
+  entityId: string;
+  currentState: string;
+  payload?: Record<string, any>;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+  definition?: WorkflowDefinition;
+}
+
+export interface WorkflowEvent {
+  id: string;
+  instanceId: string;
+  fromState: string;
+  toState: string;
+  actor: string;
+  comment?: string;
+  createdAt: string;
+}
+
+export interface Scenario {
+  id: string;
+  name: string;
+  description?: string;
+  baseType: string;
+  baseId?: string;
+  status: 'draft' | 'published' | 'archived';
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ScenarioOverride {
+  id: string;
+  scenarioId: string;
+  projectId: string;
+  startYear?: number;
+  startQuarter?: number;
+  durationQuarters?: number;
+  totalCost?: number;
+  status?: string;
+  visible?: boolean;
+  revenueEstimates?: RevenueEstimate[];
+  extraOverrides?: Record<string, any>;
+}
+
+export interface Okr {
+  id: string;
+  title: string;
+  description?: string;
+  type: 'objective' | 'key_result';
+  parentId?: string;
+  owner?: string;
+  targetValue?: number;
+  unit?: string;
+  startDate?: string;
+  endDate?: string;
+  status: string;
+  children?: Okr[];
+}
+
+export interface ProjectOkrLink {
+  projectId: string;
+  okrId: string;
+  contributionWeight: number;
+}
+
+export interface ProjectDependency {
+  id: string;
+  predecessorId: string;
+  successorId: string;
+  lagDays: number;
+  dependencyType: 'finish-to-start' | 'start-to-start' | 'finish-to-finish' | 'start-to-finish';
+}
+
+export interface CapitalAsset {
+  id: string;
+  name: string;
+  assetType: string;
+  projectId?: string;
+  value?: number;
+  depreciationSchedule?: Record<string, any>;
+  location?: string;
+  status?: string;
+  owner?: string;
+  calibrationDue?: string;
+  notes?: string;
+  customAttributes: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AlertRule {
+  id: string;
+  name: string;
+  conditionType: string;
+  conditionConfig: Record<string, any>;
+  notificationChannels: string[];
+  escalationHours?: number;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface CustomAttributeDefinition {
+  id: string;
+  key: string;
+  label: string;
+  fieldType: 'text' | 'number' | 'select' | 'boolean' | 'date';
+  options?: string[];
+  appliesTo: string[];
+  required: boolean;
+  sortOrder: number;
+}
+
+export interface ProjectCalendar {
+  id: string;
+  name: string;
+  year: number;
+  blackoutDates: string[];
+  holidays: Array<{ date: string; name: string }>;
+  appliesTo: string[];
+}
+
+export interface SpendRecord {
+  date?: string;
+  period?: string;
+  category: string;
+  amount: number;
+  type: 'realized' | 'pending';
+  soNumber?: string;
+  poNumber?: string;
+  status?: string;
+  realizationDate?: string;
 }

@@ -15,6 +15,18 @@ export const DEFAULT_DATE_RANGE: DateRangeType = {
   endYear: 2030,
 };
 
+export interface ScoringWeights {
+  roi: number;
+  risk: number;
+  strategicFit: number;
+}
+
+export const DEFAULT_SCORING_WEIGHTS: ScoringWeights = {
+  roi: 0.4,
+  risk: 0.3,
+  strategicFit: 0.3,
+};
+
 interface AppState {
   // Date range state
   dateRange: DateRangeType;
@@ -23,6 +35,14 @@ interface AppState {
   // Business unit state
   selectedBusinessUnit: string;
   setSelectedBusinessUnit: (businessUnit: string) => void;
+
+  // Projects view state
+  projectsView: 'list' | 'kanban';
+  setProjectsView: (view: 'list' | 'kanban') => void;
+
+  // Scoring weights
+  scoringWeights: ScoringWeights;
+  setScoringWeights: (weights: ScoringWeights) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -36,12 +56,22 @@ export const useAppStore = create<AppState>()(
       selectedBusinessUnit: "all",
       setSelectedBusinessUnit: (businessUnit) =>
         set({ selectedBusinessUnit: businessUnit }),
+
+      // Projects view
+      projectsView: 'list',
+      setProjectsView: (view) => set({ projectsView: view }),
+
+      // Scoring weights
+      scoringWeights: DEFAULT_SCORING_WEIGHTS,
+      setScoringWeights: (weights) => set({ scoringWeights: weights }),
     }),
     {
       name: "horizon-app-storage",
       partialize: (state) => ({
         dateRange: state.dateRange,
         selectedBusinessUnit: state.selectedBusinessUnit,
+        projectsView: state.projectsView,
+        scoringWeights: state.scoringWeights,
       }),
     }
   )

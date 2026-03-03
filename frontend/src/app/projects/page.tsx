@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui";
-import { Project, BusinessUnit, RiskFactor } from "@/lib/types";
+import { Project, OrgDataBusinessUnit, RiskFactor } from "@/lib/types";
 import { useProjectSortConfig, useProjectFilterState, useLocalStorage } from "@/lib/storage-utils";
 import { useProjectData } from "@/hooks/use-project-data";
 import { useProjectHierarchy, ProjectWithChildren } from "@/hooks/useProjectHierarchy";
 import { useProjectFilters } from "@/hooks/useProjectFilters";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { BusinessUnitFilter } from "@/components/filters/business-unit-filter";
+import { DivisionFilter } from "@/components/filters/division-filter";
 import { toast } from "sonner";
 import {
   DndContext,
@@ -23,9 +25,10 @@ import {
   closestCenter,
   MeasuringStrategy,
 } from "@dnd-kit/core";
-import { GripVertical, ArrowUpDown } from "lucide-react";
+import { GripVertical, ArrowUpDown, LayoutList, LayoutDashboard } from "lucide-react";
 import { SearchBar, SearchSuggestion } from "@/components/features/SearchBar";
 import { ProjectRow } from "@/components/features/project-row";
+import { KanbanBoard } from "@/components/features/kanban-board";
 import { ProjectEditDialog } from "@/components/forms/project-edit-dialog";
 import { DropZone } from "@/components/ui/draggable-row";
 import { FilterPanel, FilterState } from "@/components/features/filter-panel";
@@ -36,6 +39,8 @@ import { PageLayout } from "@/components/layout";
 
 export default function ProjectsPage() {
   const selectedBusinessUnit = useAppStore((state) => state.selectedBusinessUnit);
+  const projectsView = useAppStore((state) => state.projectsView);
+  const setProjectsView = useAppStore((state) => state.setProjectsView);
 
   const {
     projects,
@@ -52,6 +57,8 @@ export default function ProjectsPage() {
   const [activeProject, setActiveProject] = useState<ProjectWithChildren | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [filters, setFilters] = useProjectFilterState();
+  const [selectedBuIds, setSelectedBuIds] = useState<string[]>([]);
+  const [selectedDivisionIds, setSelectedDivisionIds] = useState<string[]>([]);
   const [pendingHierarchyChanges, setPendingHierarchyChanges] = useState<{ [key: string]: string }>({});
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentEditProject, setCurrentEditProject] = useState<ProjectWithChildren | null>(null);
@@ -90,11 +97,26 @@ export default function ProjectsPage() {
   );
 
   const businessUnitFilteredProjects = useMemo(() => {
-    if (selectedBusinessUnit === "all") {
-      return localProjects;
+    let filtered = localProjects;
+
+    // Apply global business unit filter from app store
+    if (selectedBusinessUnit !== "all") {
+      filtered = filtered.filter((project) => project.businessUnitId === selectedBusinessUnit);
     }
-    return localProjects.filter((project) => project.businessUnitId === selectedBusinessUnit);
-  }, [localProjects, selectedBusinessUnit]);
+
+    // Apply BU filter from BusinessUnitFilter component
+    if (selectedBuIds.length > 0) {
+      filtered = filtered.filter((project) =>
+        project.businessUnitId && selectedBuIds.includes(project.businessUnitId)
+      );
+    }
+
+    // Apply division filter (filter by BUs in selected divisions)
+    // Note: This requires fetching BUs from org data - for now, we'll implement in a follow-up
+    // TODO: Implement division filtering using org data client
+
+    return filtered;
+  }, [localProjects, selectedBusinessUnit, selectedBuIds, selectedDivisionIds]);
 
   const projectsList = businessUnitFilteredProjects;
 
@@ -108,22 +130,22 @@ export default function ProjectsPage() {
           label: project.name,
           value: project.name,
           category: "Projects",
-          subtitle: project.businessUnitName || "No Business Unit",
+          subtitle: project.businessUnitId || "No Business Unit",
           metadata: project.status || "No Status",
         });
       }
     });
 
-    const uniqueBusinessUnits = Array.from(new Set(projectsList.map((p) => p.businessUnitName).filter(Boolean)));
-    uniqueBusinessUnits.forEach((buName) => {
-      if (buName) {
+    const uniqueBusinessUnitIds = Array.from(new Set(projectsList.map((p) => p.businessUnitId).filter(Boolean)));
+    uniqueBusinessUnitIds.forEach((buId) => {
+      if (buId) {
         suggestions.push({
-          id: `bu-${buName}`,
-          label: buName,
-          value: buName,
+          id: `bu-${buId}`,
+          label: buId,
+          value: buId,
           category: "Business Units",
           subtitle: "Business Unit",
-          metadata: `${projectsList.filter((p) => p.businessUnitName === buName).length} projects`,
+          metadata: `${projectsList.filter((p) => p.businessUnitId === buId).length} projects`,
         });
       }
     });
@@ -149,7 +171,7 @@ export default function ProjectsPage() {
     setSearchQuery(suggestion.value);
 
     if (suggestion.category === "Business Units") {
-      const businessUnit = businessUnits.find((bu: BusinessUnit) => bu.name === suggestion.value);
+      const businessUnit = businessUnits.find((bu: OrgDataBusinessUnit) => bu.name === suggestion.value);
       if (businessUnit) {
         setFilters((prev) => ({ ...prev, businessUnitId: businessUnit.id }));
       }
@@ -172,6 +194,8 @@ export default function ProjectsPage() {
   const handleClearFilters = () => {
     setFilters({});
     setSearchQuery("");
+    setSelectedBuIds([]);
+    setSelectedDivisionIds([]);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -338,7 +362,6 @@ export default function ProjectsPage() {
       id: "",
       name: "",
       businessUnitId: "",
-      businessUnitName: "",
       startQuarter: 1,
       startYear: new Date().getFullYear(),
       durationQuarters: 4,
@@ -447,9 +470,31 @@ export default function ProjectsPage() {
         title: "Projects",
         subtitle: "Manage projects and hierarchy",
         actions: (
-          <Button onClick={handleOpenCreateDialog}>
-            Create Project
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center border rounded-md overflow-hidden">
+              <button
+                type="button"
+                aria-label="List view"
+                aria-pressed={projectsView === 'list'}
+                className={`flex items-center gap-1 px-2 py-1.5 text-sm transition-colors ${projectsView === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                onClick={() => setProjectsView('list')}
+              >
+                <LayoutList className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                aria-label="Kanban view"
+                aria-pressed={projectsView === 'kanban'}
+                className={`flex items-center gap-1 px-2 py-1.5 text-sm transition-colors ${projectsView === 'kanban' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                onClick={() => setProjectsView('kanban')}
+              >
+                <LayoutDashboard className="h-4 w-4" />
+              </button>
+            </div>
+            <Button onClick={handleOpenCreateDialog}>
+              Create Project
+            </Button>
+          </div>
         ),
       }}
     >
@@ -469,10 +514,13 @@ export default function ProjectsPage() {
           <FilterPanel
             filters={filters as FilterState}
             onFilterChange={setFilters}
-            businessUnits={businessUnits as BusinessUnit[]}
+            businessUnits={businessUnits}
             activeFilterCount={activeFilterCount}
             onClearFilters={handleClearFilters}
           />
+
+          <BusinessUnitFilter value={selectedBuIds} onChange={setSelectedBuIds} />
+          <DivisionFilter value={selectedDivisionIds} onChange={setSelectedDivisionIds} />
 
           <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
             <div>Total Projects: {projectsList.length}</div>
@@ -480,6 +528,24 @@ export default function ProjectsPage() {
           </div>
         </div>
 
+        {projectsView === 'kanban' && (
+          <div className="flex-1 min-h-0 overflow-auto p-4">
+            <KanbanBoard
+              projects={filteredProjects}
+              onUpdateStatus={async (projectId, newStatus) => {
+                const project = projectsList.find((p) => p.id === projectId);
+                if (!project) return;
+                await updateProject({ ...project, status: newStatus } as any);
+              }}
+              onProjectClick={(projectId) => {
+                const project = projectsList.find((p) => p.id === projectId) as ProjectWithChildren | undefined;
+                if (project) handleOpenEditDialog(project);
+              }}
+            />
+          </div>
+        )}
+
+        {projectsView === 'list' && (
         <div className="flex-1 min-h-0 overflow-auto border rounded-md">
           <DndContext
             sensors={sensors}
@@ -554,6 +620,7 @@ export default function ProjectsPage() {
             <DragOverlay>{activeProject && <DraggedProjectPreview project={activeProject} />}</DragOverlay>
           </DndContext>
         </div>
+        )}
       </div>
 
       {editDialogOpen && currentEditProject && (
@@ -562,7 +629,6 @@ export default function ProjectsPage() {
           onOpenChange={setEditDialogOpen}
           project={currentEditProject}
           onSave={handleSaveProject}
-          businessUnits={businessUnits}
           dialogTitle="Edit Project"
         />
       )}
@@ -573,7 +639,6 @@ export default function ProjectsPage() {
           onOpenChange={setCreateDialogOpen}
           project={currentEditProject}
           onSave={handleCreateProject}
-          businessUnits={businessUnits}
           dialogTitle="Create Project"
         />
       )}

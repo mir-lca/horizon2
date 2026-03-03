@@ -7,13 +7,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   useProjects,
   useResources,
-  useBusinessUnits,
   useCompetences,
   useUpsertProject,
   useDeleteProject,
   queryKeys,
 } from "@/lib/queries";
-import { Project, Resource, BusinessUnit, Competence } from "@/lib/types";
+import { useBusinessUnits } from "@/contexts/org-data-context";
+import { Project, Resource, OrgDataBusinessUnit, Competence } from "@/lib/types";
 import { ProjectUtils } from "@/lib/project-utils";
 
 export function useProjectData() {
@@ -27,11 +27,12 @@ export function useProjectData() {
   const upsertProjectMutation = useUpsertProject();
   const deleteProjectMutation = useDeleteProject();
 
-  const loading = projectsLoading || resourcesLoading || businessUnitsLoading || competencesLoading;
-  const error = projectsError || resourcesError || businessUnitsError || competencesError;
+  // Don't block on business units loading since they're fetched from org data
+  const loading = projectsLoading || resourcesLoading || competencesLoading;
+  const error = projectsError || resourcesError || competencesError;
 
   const lookupMaps = useMemo(() => {
-    const businessUnitsMap = new Map(businessUnits.map((bu: BusinessUnit) => [bu.id, bu]));
+    const businessUnitsMap = new Map(businessUnits.map((bu: OrgDataBusinessUnit) => [bu.id, bu]));
     const resourcesMap = new Map(resources.map((r: Resource) => [r.id, r]));
     const competencesMap = new Map(competences.map((c: Competence) => [c.id, c]));
 
@@ -53,7 +54,7 @@ export function useProjectData() {
   const refetchAll = () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.projects });
     queryClient.invalidateQueries({ queryKey: queryKeys.resources });
-    queryClient.invalidateQueries({ queryKey: queryKeys.businessUnits });
+    queryClient.invalidateQueries({ queryKey: ['org-data', 'business-units'] });
     queryClient.invalidateQueries({ queryKey: queryKeys.competences });
   };
 
@@ -66,7 +67,7 @@ export function useProjectData() {
   };
 
   const refetchBusinessUnits = () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.businessUnits });
+    queryClient.invalidateQueries({ queryKey: ['org-data', 'business-units'] });
   };
 
   const refetchCompetences = () => {

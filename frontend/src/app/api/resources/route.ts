@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, execute } from '@/lib/db';
 import { randomUUID } from 'crypto';
+import { z } from 'zod';
 
-export async function GET() {
+const ResourceSchema = z.object({
+  competenceId: z.string().uuid("Valid competence ID required"),
+  competenceName: z.string().optional(),
+  quantity: z.number().min(0).optional(),
+  yearlyWage: z.number().min(0).optional(),
+  businessUnitId: z.string().uuid().optional().nullable(),
+  businessUnitName: z.string().optional().nullable(),
+  skills: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
+  isAI: z.boolean().optional()
+});
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const includeArchived = searchParams.get('includeArchived') === 'true';
+
   try {
     const resources = await query(`
       SELECT id::text,
@@ -10,12 +26,14 @@ export async function GET() {
              competence_name AS "competenceName",
              quantity,
              yearly_wage AS "yearlyWage",
-             business_unit_id::text AS "businessUnitId",
-             business_unit_name AS "businessUnitName",
+             business_unit_id AS "businessUnitId",
+             employee_references AS "employeeReferences",
              skills,
              name,
-             is_ai AS "isAI"
+             is_ai AS "isAI",
+             archived_at AS "archivedAt"
       FROM resources
+      ${includeArchived ? '' : 'WHERE archived_at IS NULL'}
       ORDER BY competence_name
     `);
 
@@ -31,14 +49,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = await request.json();
-
-    if (!payload.competenceId) {
-      return NextResponse.json(
-        { error: 'Competence is required' },
-        { status: 400 }
-      );
-    }
+    const body = await request.json();
+    const payload = ResourceSchema.parse(body);
 
     const resourceId = randomUUID();
 

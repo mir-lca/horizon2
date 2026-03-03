@@ -4,14 +4,16 @@ import { randomUUID } from 'crypto';
 import { ProjectSchema } from '@/lib/schemas';
 import { validateRequest } from '@/lib/api-validation';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const parentProjectId = searchParams.get('parentProjectId');
+
   try {
-    const projects = await query(`
+    const baseQuery = `
       SELECT id::text,
              name,
              description,
-             business_unit_id::text AS "businessUnitId",
-             business_unit_name AS "businessUnitName",
+             business_unit_id AS "businessUnitId",
              risk_level AS "riskLevel",
              start_year AS "startYear",
              start_quarter AS "startQuarter",
@@ -35,8 +37,11 @@ export async function GET() {
              created_at AS "createdAt",
              updated_at AS "updatedAt"
       FROM projects
+      ${parentProjectId ? 'WHERE parent_project_id = $1' : ''}
       ORDER BY name
-    `);
+    `;
+
+    const projects = await query(baseQuery, parentProjectId ? [parentProjectId] : []);
 
     return NextResponse.json(projects);
   } catch (error) {
@@ -72,7 +77,6 @@ export async function POST(request: NextRequest) {
         name,
         description,
         business_unit_id,
-        business_unit_name,
         risk_level,
         start_year,
         start_quarter,
@@ -94,9 +98,9 @@ export async function POST(request: NextRequest) {
         maturity_level,
         color
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-        $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
-        $21, $22, $23, $24, $25
+        $1, $2, $3, $4, $5, $6, $7, $8, $9,
+        $10, $11, $12, $13, $14, $15, $16, $17, $18, $19,
+        $20, $21, $22, $23, $24
       )
       `,
       [
@@ -104,7 +108,6 @@ export async function POST(request: NextRequest) {
         validatedData.name.trim(),
         validatedData.description || null,
         validatedData.businessUnitId || null,
-        validatedData.businessUnitName || null,
         validatedData.riskLevel,
         validatedData.startYear,
         validatedData.startQuarter,
@@ -134,8 +137,7 @@ export async function POST(request: NextRequest) {
       SELECT id::text,
              name,
              description,
-             business_unit_id::text AS "businessUnitId",
-             business_unit_name AS "businessUnitName",
+             business_unit_id AS "businessUnitId",
              risk_level AS "riskLevel",
              start_year AS "startYear",
              start_quarter AS "startQuarter",

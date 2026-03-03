@@ -4,11 +4,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiService } from "../api-service";
 import { ContainerTypes } from "../cosmos-config";
 import { toast } from "sonner";
-import type { Project, Resource, BusinessUnit, Competence } from "../types";
+import type { Project, Resource, Competence, Milestone, Risk } from "../types";
 import {
   ProjectApiResponseSchema,
   ResourceApiResponseSchema,
-  BusinessUnitApiResponseSchema,
   CompetenceApiResponseSchema,
 } from "../schemas";
 
@@ -18,7 +17,11 @@ export const queryKeys = {
   resources: ["resources"] as const,
   businessUnits: ["business-units"] as const,
   competences: ["competences"] as const,
+  capitalAssets: ["capital-assets"] as const,
+  okrs: ["okrs"] as const,
   project: (id: string) => ["projects", id] as const,
+  milestones: (projectId: string) => ["milestones", projectId] as const,
+  risks: (entityId: string) => ["risks", entityId] as const,
 };
 
 // Generic hook for fetching all items with validation
@@ -76,15 +79,6 @@ export function useResources() {
     ContainerTypes.RESOURCES,
     queryKeys.resources,
     ResourceApiResponseSchema
-  );
-}
-
-// Business Units
-export function useBusinessUnits() {
-  return useItems<BusinessUnit>(
-    ContainerTypes.BUSINESS_UNITS,
-    queryKeys.businessUnits,
-    BusinessUnitApiResponseSchema
   );
 }
 
@@ -200,49 +194,6 @@ export function useDeleteResource() {
   });
 }
 
-export function useUpsertBusinessUnit() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (businessUnit: BusinessUnit) =>
-      apiService.upsert<BusinessUnit>(ContainerTypes.BUSINESS_UNITS, businessUnit),
-    onSuccess: (data) => {
-      queryClient.setQueryData<BusinessUnit[]>(queryKeys.businessUnits, (old = []) => {
-        const index = old.findIndex((bu) => bu.id === data.id);
-        if (index >= 0) {
-          const updated = [...old];
-          updated[index] = data;
-          return updated;
-        }
-        return [...old, data];
-      });
-      toast.success("Business unit updated successfully");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to update business unit: ${error.message}`);
-    },
-  });
-}
-
-export function useDeleteBusinessUnit() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) =>
-      apiService.delete(ContainerTypes.BUSINESS_UNITS, id),
-    onSuccess: (_, id) => {
-      queryClient.setQueryData<BusinessUnit[]>(
-        queryKeys.businessUnits,
-        (old = []) => old.filter((bu) => bu.id !== id)
-      );
-      toast.success("Business unit deleted successfully");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete business unit: ${error.message}`);
-    },
-  });
-}
-
 export function useUpsertCompetence() {
   const queryClient = useQueryClient();
 
@@ -283,5 +234,145 @@ export function useDeleteCompetence() {
     onError: (error: Error) => {
       toast.error(`Failed to delete competence: ${error.message}`);
     },
+  });
+}
+
+// Milestones
+export function useMilestones(projectId: string) {
+  return useQuery({
+    queryKey: queryKeys.milestones(projectId),
+    queryFn: async () => {
+      const res = await fetch(`/api/milestones?projectId=${projectId}`);
+      if (!res.ok) throw new Error("Failed to fetch milestones");
+      return res.json() as Promise<Milestone[]>;
+    },
+    enabled: !!projectId,
+    staleTime: 10000,
+  });
+}
+
+export function useCreateMilestone() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { projectId: string; name: string; dueDate?: string; status?: string; description?: string; owner?: string }) => {
+      const res = await fetch("/api/milestones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create milestone");
+      return res.json() as Promise<Milestone>;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.milestones(variables.projectId) });
+      toast.success("Milestone created");
+    },
+    onError: (error: Error) => toast.error(`Failed to create milestone: ${error.message}`),
+  });
+}
+
+export function useUpdateMilestone() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, projectId, ...data }: { id: string; projectId: string; name?: string; dueDate?: string; status?: string; description?: string; owner?: string }) => {
+      const res = await fetch(`/api/milestones/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update milestone");
+      return res.json() as Promise<Milestone>;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.milestones(data.projectId) });
+      toast.success("Milestone updated");
+    },
+    onError: (error: Error) => toast.error(`Failed to update milestone: ${error.message}`),
+  });
+}
+
+export function useDeleteMilestone() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, projectId }: { id: string; projectId: string }) => {
+      const res = await fetch(`/api/milestones/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete milestone");
+      return { id, projectId };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.milestones(data.projectId) });
+      toast.success("Milestone deleted");
+    },
+    onError: (error: Error) => toast.error(`Failed to delete milestone: ${error.message}`),
+  });
+}
+
+// Risks
+export function useRisks(entityId: string, entityType = "project") {
+  return useQuery({
+    queryKey: queryKeys.risks(entityId),
+    queryFn: async () => {
+      const res = await fetch(`/api/risks?entityId=${entityId}&entityType=${entityType}`);
+      if (!res.ok) throw new Error("Failed to fetch risks");
+      return res.json() as Promise<Risk[]>;
+    },
+    enabled: !!entityId,
+    staleTime: 10000,
+  });
+}
+
+export function useCreateRisk() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { entityType?: string; entityId: string; title: string; description?: string; probability?: string; impact?: string; status?: string; owner?: string; mitigation?: string }) => {
+      const res = await fetch("/api/risks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create risk");
+      return res.json() as Promise<Risk>;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.risks(data.entityId) });
+      toast.success("Risk created");
+    },
+    onError: (error: Error) => toast.error(`Failed to create risk: ${error.message}`),
+  });
+}
+
+export function useUpdateRisk() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, entityId, ...data }: { id: string; entityId: string; title?: string; description?: string; probability?: string; impact?: string; status?: string; owner?: string; mitigation?: string }) => {
+      const res = await fetch(`/api/risks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update risk");
+      return res.json() as Promise<Risk>;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.risks(data.entityId) });
+      toast.success("Risk updated");
+    },
+    onError: (error: Error) => toast.error(`Failed to update risk: ${error.message}`),
+  });
+}
+
+export function useDeleteRisk() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, entityId }: { id: string; entityId: string }) => {
+      const res = await fetch(`/api/risks/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete risk");
+      return { id, entityId };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.risks(data.entityId) });
+      toast.success("Risk deleted");
+    },
+    onError: (error: Error) => toast.error(`Failed to delete risk: ${error.message}`),
   });
 }

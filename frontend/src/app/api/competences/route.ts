@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, execute } from '@/lib/db';
 import { randomUUID } from 'crypto';
+import { z } from 'zod';
+
+const CompetenceSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  category: z.string().optional(),
+  averageSalary: z.number().min(0).optional().nullable()
+});
 
 export async function GET() {
   try {
@@ -26,14 +34,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = await request.json();
-
-    if (!payload.name) {
-      return NextResponse.json(
-        { error: 'Competence name is required' },
-        { status: 400 }
-      );
-    }
+    const body = await request.json();
+    const payload = CompetenceSchema.parse(body);
 
     const competenceId = randomUUID();
 
@@ -44,7 +46,7 @@ export async function POST(request: NextRequest) {
       `,
       [
         competenceId,
-        payload.name.trim(),
+        payload.name,
         payload.description || null,
         payload.category || null,
         payload.averageSalary || null,
