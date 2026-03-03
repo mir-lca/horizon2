@@ -11,6 +11,7 @@ import { Download } from "lucide-react";
 import type { Project } from "@/lib/types";
 import { exportToCsv } from "@/lib/export";
 import { ScoringModel } from "@/components/features/scoring-model";
+import { Legend } from "recharts";
 
 const RISK_COLOR: Record<string, string> = {
   low: '#22c55e',
@@ -156,6 +157,89 @@ function PivotTableTab({ projects }: { projects: Project[] }) {
   );
 }
 
+function buildQuarterLabels(count: number): string[] {
+  const now = new Date();
+  const startYear = now.getFullYear();
+  const startQ = Math.floor(now.getMonth() / 3) + 1;
+  const labels: string[] = [];
+  let year = startYear;
+  let q = startQ;
+  for (let i = 0; i < count; i++) {
+    labels.push(`Q${q} ${year}`);
+    q++;
+    if (q > 4) { q = 1; year++; }
+  }
+  return labels;
+}
+
+function dateToQuarterLabel(date: string): string {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const q = Math.floor(d.getMonth() / 3) + 1;
+  return `Q${q} ${year}`;
+}
+
+const SPEND_GAP_QUARTERS = buildQuarterLabels(8);
+
+function SpendGapTab({ projects }: { projects: Project[] }) {
+  const chartData = useMemo(() => {
+    const byQuarter: Record<string, { actual: number; forecast: number }> = {};
+    SPEND_GAP_QUARTERS.forEach((q) => { byQuarter[q] = { actual: 0, forecast: 0 }; });
+
+    projects.forEach((p) => {
+      (p.spendRecords ?? []).forEach((r) => {
+        const label = r.date ? dateToQuarterLabel(r.date) : null;
+        if (!label || !byQuarter[label]) return;
+        if (r.type === 'realized') {
+          byQuarter[label].actual += r.amount;
+        } else {
+          byQuarter[label].forecast += r.amount;
+        }
+      });
+    });
+
+    return SPEND_GAP_QUARTERS.map((q) => ({
+      quarter: q,
+      actual: Math.round(byQuarter[q].actual),
+      forecast: Math.round(byQuarter[q].forecast),
+    }));
+  }, [projects]);
+
+  const hasData = chartData.some((d) => d.actual > 0 || d.forecast > 0);
+
+  const fmt = (v: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' }).format(v);
+
+  if (!hasData) {
+    return (
+      <div className="border rounded-lg p-8 flex items-center justify-center">
+        <p className="text-sm text-muted-foreground italic">No spend data available for active projects</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="border rounded-lg p-4">
+        <h3 className="text-sm font-semibold mb-4">Actual vs forecast spend by quarter</h3>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} barGap={4} barCategoryGap="20%">
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis dataKey="quarter" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => fmt(v)} />
+              <Tooltip formatter={(value: number) => fmt(value)} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Bar dataKey="actual" name="Actual" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="forecast" name="Forecast" fill="#d1d5db" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ReportsPage() {
   const [tab, setTab] = useState("portfolio");
   const { data: projects = [], isLoading } = useProjects();
@@ -180,6 +264,7 @@ export default function ReportsPage() {
           <TabsTrigger value="portfolio">Portfolio table</TabsTrigger>
           <TabsTrigger value="risk">Risk dashboard</TabsTrigger>
           <TabsTrigger value="scoring">Scoring</TabsTrigger>
+          <TabsTrigger value="spend-gap">Spend gap</TabsTrigger>
         </TabsList>
         <TabsContent value="portfolio">
           <PivotTableTab projects={projects as Project[]} />
@@ -189,6 +274,9 @@ export default function ReportsPage() {
         </TabsContent>
         <TabsContent value="scoring">
           <ScoringModel projects={projects as Project[]} />
+        </TabsContent>
+        <TabsContent value="spend-gap">
+          <SpendGapTab projects={projects as Project[]} />
         </TabsContent>
       </Tabs>
     </PageLayout>

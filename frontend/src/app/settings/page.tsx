@@ -11,9 +11,31 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { MockBadge } from "@/components/horizon-ui";
 import { CapitalAssetDialog } from "@/components/features/capital-asset-dialog";
 import { OkrDialog } from "@/components/features/okr-dialog";
-import type { CapitalAsset, Okr } from "@/lib/types";
+import { GovernanceStagePipeline } from "@/components/features/governance-stage-pipeline";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  useLabourRates,
+  useUpsertLabourRate,
+  useDeleteLabourRate,
+  useSkills,
+  useUpsertSkill,
+  useDeleteSkill,
+  useUserRoles,
+  useUpsertUserRole,
+  useDeleteUserRole,
+} from "@/lib/queries";
+import type { CapitalAsset, Okr, LabourRate, Skill, UserRole } from "@/lib/types";
 
-// --- Alert rules tab ---
+// ─── Alert rules tab ───────────────────────────────────────────────────────────
+
 interface AlertRule {
   id: string;
   name: string;
@@ -90,7 +112,8 @@ function AlertRulesTab() {
   );
 }
 
-// --- Custom attributes tab ---
+// ─── Custom attributes tab ─────────────────────────────────────────────────────
+
 interface CustomAttrDef {
   id: string;
   key: string;
@@ -153,7 +176,7 @@ function CustomAttributesTab() {
   );
 }
 
-// --- Capital assets tab ---
+// ─── Capital assets tab ────────────────────────────────────────────────────────
 
 function CapitalAssetsTab() {
   const queryClient = useQueryClient();
@@ -260,7 +283,7 @@ function CapitalAssetsTab() {
   );
 }
 
-// --- OKRs tab ---
+// ─── OKRs tab ──────────────────────────────────────────────────────────────────
 
 function OkrsTab() {
   const queryClient = useQueryClient();
@@ -386,6 +409,546 @@ function OkrsTab() {
   );
 }
 
+// ─── Labour rates tab ──────────────────────────────────────────────────────────
+
+const SENIORITY_LEVELS = ['junior', 'mid', 'senior', 'lead', 'principal'] as const;
+const CURRENCIES = ['USD', 'EUR', 'DKK', 'GBP', 'JPY', 'CNY'] as const;
+
+interface LabourRateFormState {
+  region: string;
+  seniorityLevel: string;
+  roleCategory: string;
+  ratePerHour: string;
+  currency: string;
+  effectiveDate: string;
+}
+
+const EMPTY_RATE_FORM: LabourRateFormState = {
+  region: '',
+  seniorityLevel: 'mid',
+  roleCategory: '',
+  ratePerHour: '',
+  currency: 'USD',
+  effectiveDate: '',
+};
+
+function LabourRatesTab() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selected, setSelected] = useState<LabourRate | null>(null);
+  const [form, setForm] = useState<LabourRateFormState>(EMPTY_RATE_FORM);
+
+  const { data: rates = [], isLoading } = useLabourRates();
+  const upsert = useUpsertLabourRate();
+  const remove = useDeleteLabourRate();
+
+  const openCreate = () => {
+    setSelected(null);
+    setForm(EMPTY_RATE_FORM);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (rate: LabourRate) => {
+    setSelected(rate);
+    setForm({
+      region: rate.region,
+      seniorityLevel: rate.seniorityLevel,
+      roleCategory: rate.roleCategory ?? '',
+      ratePerHour: String(rate.ratePerHour),
+      currency: rate.currency,
+      effectiveDate: rate.effectiveDate,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    const payload: Partial<LabourRate> = {
+      ...(selected ? { id: selected.id } : {}),
+      region: form.region,
+      seniorityLevel: form.seniorityLevel,
+      roleCategory: form.roleCategory || undefined,
+      ratePerHour: Number(form.ratePerHour),
+      currency: form.currency,
+      effectiveDate: form.effectiveDate,
+    };
+    upsert.mutate(payload, {
+      onSuccess: () => setDialogOpen(false),
+    });
+  };
+
+  const handleDelete = (id: string) => {
+    if (!window.confirm('Delete this rate?')) return;
+    remove.mutate(id);
+  };
+
+  const fmt = (n: number) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(n);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">Labour rates</h3>
+        <Button size="sm" variant="outline" onClick={openCreate}>
+          <Plus className="h-3 w-3 mr-1" /> New rate
+        </Button>
+      </div>
+
+      {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+      {!isLoading && rates.length === 0 && (
+        <p className="text-sm text-muted-foreground italic">No labour rates configured</p>
+      )}
+
+      {rates.length > 0 && (
+        <div className="border rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="text-left px-3 py-2 text-xs font-medium">Region</th>
+                <th className="text-left px-3 py-2 text-xs font-medium">Seniority</th>
+                <th className="text-left px-3 py-2 text-xs font-medium">Role category</th>
+                <th className="text-right px-3 py-2 text-xs font-medium">Rate/hr</th>
+                <th className="text-left px-3 py-2 text-xs font-medium">Currency</th>
+                <th className="text-left px-3 py-2 text-xs font-medium">Effective date</th>
+                <th className="px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {rates.map((r) => (
+                <tr key={r.id} className="hover:bg-muted/30">
+                  <td className="px-3 py-2">{r.region}</td>
+                  <td className="px-3 py-2">
+                    <Badge variant="outline" className="text-xs">{r.seniorityLevel}</Badge>
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground">{r.roleCategory ?? '—'}</td>
+                  <td className="px-3 py-2 text-right font-mono">{fmt(r.ratePerHour)}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{r.currency}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{r.effectiveDate}</td>
+                  <td className="px-3 py-2 text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(r)}>
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => handleDelete(r.id)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{selected ? 'Edit rate' : 'New rate'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1">
+              <Label className="text-xs">Region</Label>
+              <Input
+                value={form.region}
+                onChange={(e) => setForm((f) => ({ ...f, region: e.target.value }))}
+                placeholder="e.g. EMEA, US, APAC"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Seniority level</Label>
+              <select
+                className="w-full text-sm border rounded px-2 py-1.5 h-8"
+                value={form.seniorityLevel}
+                onChange={(e) => setForm((f) => ({ ...f, seniorityLevel: e.target.value }))}
+              >
+                {SENIORITY_LEVELS.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Role category (optional)</Label>
+              <Input
+                value={form.roleCategory}
+                onChange={(e) => setForm((f) => ({ ...f, roleCategory: e.target.value }))}
+                placeholder="e.g. Software Engineer"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Rate per hour</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={form.ratePerHour}
+                  onChange={(e) => setForm((f) => ({ ...f, ratePerHour: e.target.value }))}
+                  placeholder="0.00"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Currency</Label>
+                <select
+                  className="w-full text-sm border rounded px-2 py-1.5 h-8"
+                  value={form.currency}
+                  onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Effective date</Label>
+              <Input
+                type="date"
+                value={form.effectiveDate}
+                onChange={(e) => setForm((f) => ({ ...f, effectiveDate: e.target.value }))}
+                className="h-8 text-sm"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={upsert.isPending || !form.region || !form.ratePerHour || !form.effectiveDate}
+            >
+              {upsert.isPending ? 'Saving...' : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Skills tab ────────────────────────────────────────────────────────────────
+
+interface SkillFormState {
+  name: string;
+  category: string;
+  description: string;
+}
+
+const EMPTY_SKILL_FORM: SkillFormState = { name: '', category: '', description: '' };
+
+function SkillsTab() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selected, setSelected] = useState<Skill | null>(null);
+  const [form, setForm] = useState<SkillFormState>(EMPTY_SKILL_FORM);
+
+  const { data: skills = [], isLoading } = useSkills();
+  const upsert = useUpsertSkill();
+  const remove = useDeleteSkill();
+
+  const openCreate = () => {
+    setSelected(null);
+    setForm(EMPTY_SKILL_FORM);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (skill: Skill) => {
+    setSelected(skill);
+    setForm({
+      name: skill.name,
+      category: skill.category ?? '',
+      description: skill.description ?? '',
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    const payload: Partial<Skill> = {
+      ...(selected ? { id: selected.id } : {}),
+      name: form.name,
+      category: form.category || undefined,
+      description: form.description || undefined,
+    };
+    upsert.mutate(payload, {
+      onSuccess: () => setDialogOpen(false),
+    });
+  };
+
+  const handleDelete = (id: string) => {
+    if (!window.confirm('Delete this skill?')) return;
+    remove.mutate(id);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">Skills</h3>
+        <Button size="sm" variant="outline" onClick={openCreate}>
+          <Plus className="h-3 w-3 mr-1" /> Add skill
+        </Button>
+      </div>
+
+      {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+      {!isLoading && skills.length === 0 && (
+        <p className="text-sm text-muted-foreground italic">No skills defined</p>
+      )}
+
+      {skills.length > 0 && (
+        <div className="border rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="text-left px-3 py-2 text-xs font-medium">Name</th>
+                <th className="text-left px-3 py-2 text-xs font-medium">Category</th>
+                <th className="text-left px-3 py-2 text-xs font-medium">Description</th>
+                <th className="px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {skills.map((s) => (
+                <tr key={s.id} className="hover:bg-muted/30">
+                  <td className="px-3 py-2 font-medium">{s.name}</td>
+                  <td className="px-3 py-2">
+                    {s.category ? (
+                      <Badge variant="outline" className="text-xs">{s.category}</Badge>
+                    ) : '—'}
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground text-xs">{s.description ?? '—'}</td>
+                  <td className="px-3 py-2 text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(s)}>
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => handleDelete(s.id)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{selected ? 'Edit skill' : 'Add skill'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1">
+              <Label className="text-xs">Name</Label>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="Skill name"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Category (optional)</Label>
+              <Input
+                value={form.category}
+                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                placeholder="e.g. Technical, Soft skills"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Description (optional)</Label>
+              <Input
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                placeholder="Brief description"
+                className="h-8 text-sm"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={upsert.isPending || !form.name}
+            >
+              {upsert.isPending ? 'Saving...' : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── User roles tab (access control) ──────────────────────────────────────────
+
+const ROLE_VARIANT: Record<UserRole['role'], 'destructive' | 'secondary' | 'outline'> = {
+  admin: 'destructive',
+  pm: 'secondary',
+  viewer: 'outline',
+};
+
+interface UserRoleFormState {
+  userEmail: string;
+  displayName: string;
+  role: UserRole['role'];
+}
+
+const EMPTY_ROLE_FORM: UserRoleFormState = { userEmail: '', displayName: '', role: 'viewer' };
+
+function UserRolesTab() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selected, setSelected] = useState<UserRole | null>(null);
+  const [form, setForm] = useState<UserRoleFormState>(EMPTY_ROLE_FORM);
+
+  const { data: userRoles = [], isLoading } = useUserRoles();
+  const upsert = useUpsertUserRole();
+  const remove = useDeleteUserRole();
+
+  const openCreate = () => {
+    setSelected(null);
+    setForm(EMPTY_ROLE_FORM);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (ur: UserRole) => {
+    setSelected(ur);
+    setForm({
+      userEmail: ur.userEmail,
+      displayName: ur.displayName ?? '',
+      role: ur.role,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    const payload: Partial<UserRole> = {
+      ...(selected ? { id: selected.id } : {}),
+      userEmail: form.userEmail,
+      displayName: form.displayName || undefined,
+      role: form.role,
+    };
+    upsert.mutate(payload, {
+      onSuccess: () => setDialogOpen(false),
+    });
+  };
+
+  const handleDelete = (id: string) => {
+    if (!window.confirm('Remove this user role?')) return;
+    remove.mutate(id);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">Access control</h3>
+        <Button size="sm" variant="outline" onClick={openCreate}>
+          <Plus className="h-3 w-3 mr-1" /> Add user
+        </Button>
+      </div>
+
+      {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+      {!isLoading && userRoles.length === 0 && (
+        <p className="text-sm text-muted-foreground italic">No user roles configured</p>
+      )}
+
+      {userRoles.length > 0 && (
+        <div className="border rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="text-left px-3 py-2 text-xs font-medium">Email</th>
+                <th className="text-left px-3 py-2 text-xs font-medium">Display name</th>
+                <th className="text-left px-3 py-2 text-xs font-medium">Role</th>
+                <th className="text-left px-3 py-2 text-xs font-medium">Created</th>
+                <th className="px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {userRoles.map((ur) => (
+                <tr key={ur.id} className="hover:bg-muted/30">
+                  <td className="px-3 py-2 font-mono text-xs">{ur.userEmail}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{ur.displayName ?? '—'}</td>
+                  <td className="px-3 py-2">
+                    <Badge variant={ROLE_VARIANT[ur.role]} className="text-xs">{ur.role}</Badge>
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground text-xs">
+                    {new Date(ur.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(ur)}>
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => handleDelete(ur.id)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{selected ? 'Edit user role' : 'Add user'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1">
+              <Label className="text-xs">Email</Label>
+              <Input
+                type="email"
+                value={form.userEmail}
+                onChange={(e) => setForm((f) => ({ ...f, userEmail: e.target.value }))}
+                placeholder="user@example.com"
+                className="h-8 text-sm"
+                disabled={!!selected}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Display name (optional)</Label>
+              <Input
+                value={form.displayName}
+                onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
+                placeholder="Full name"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Role</Label>
+              <select
+                className="w-full text-sm border rounded px-2 py-1.5 h-8"
+                value={form.role}
+                onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as UserRole['role'] }))}
+              >
+                <option value="viewer">Viewer</option>
+                <option value="pm">PM</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={upsert.isPending || !form.userEmail}
+            >
+              {upsert.isPending ? 'Saving...' : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
+
 export default function SettingsPage() {
   const [tab, setTab] = useState("attributes");
 
@@ -402,8 +965,12 @@ export default function SettingsPage() {
           <TabsTrigger value="alerts">Alert rules</TabsTrigger>
           <TabsTrigger value="assets">Assets</TabsTrigger>
           <TabsTrigger value="okrs">OKRs</TabsTrigger>
+          <TabsTrigger value="labour-rates">Labour rates</TabsTrigger>
+          <TabsTrigger value="skills">Skills</TabsTrigger>
+          <TabsTrigger value="governance">Governance</TabsTrigger>
           <TabsTrigger value="access">Access control</TabsTrigger>
         </TabsList>
+
         <TabsContent value="attributes">
           <CustomAttributesTab />
         </TabsContent>
@@ -416,10 +983,17 @@ export default function SettingsPage() {
         <TabsContent value="okrs">
           <OkrsTab />
         </TabsContent>
+        <TabsContent value="labour-rates">
+          <LabourRatesTab />
+        </TabsContent>
+        <TabsContent value="skills">
+          <SkillsTab />
+        </TabsContent>
+        <TabsContent value="governance">
+          <GovernanceStagePipeline />
+        </TabsContent>
         <TabsContent value="access">
-          <div className="border rounded-lg p-8 text-center text-muted-foreground">
-            <p className="text-sm">Role-based access control — assign users to roles via Azure AD</p>
-          </div>
+          <UserRolesTab />
         </TabsContent>
       </Tabs>
     </PageLayout>

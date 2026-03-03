@@ -25,11 +25,12 @@ import {
   closestCenter,
   MeasuringStrategy,
 } from "@dnd-kit/core";
-import { GripVertical, ArrowUpDown, LayoutList, LayoutDashboard } from "lucide-react";
+import { GripVertical, ArrowUpDown, LayoutList, LayoutDashboard, Upload } from "lucide-react";
 import { SearchBar, SearchSuggestion } from "@/components/features/SearchBar";
 import { ProjectRow } from "@/components/features/project-row";
 import { KanbanBoard } from "@/components/features/kanban-board";
 import { ProjectEditDialog } from "@/components/forms/project-edit-dialog";
+import { ProjectImportDialog } from "@/components/features/project-import-dialog";
 import { DropZone } from "@/components/ui/draggable-row";
 import { FilterPanel, FilterState } from "@/components/features/filter-panel";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui";
@@ -63,6 +64,7 @@ export default function ProjectsPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentEditProject, setCurrentEditProject] = useState<ProjectWithChildren | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [localProjects, setLocalProjects] = useState<Project[]>([]);
   const [sortConfig, setSortConfig] = useProjectSortConfig();
 
@@ -491,6 +493,9 @@ export default function ProjectsPage() {
                 <LayoutDashboard className="h-4 w-4" />
               </button>
             </div>
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+              <Upload className="h-4 w-4 mr-1" /> Import
+            </Button>
             <Button onClick={handleOpenCreateDialog}>
               Create Project
             </Button>
@@ -642,6 +647,12 @@ export default function ProjectsPage() {
           dialogTitle="Create Project"
         />
       )}
+
+      <ProjectImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onSuccess={() => { setImportDialogOpen(false); refetchAll(); }}
+      />
     </PageLayout>
   );
 }

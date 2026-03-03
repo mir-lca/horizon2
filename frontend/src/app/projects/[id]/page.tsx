@@ -22,15 +22,26 @@ import { EvmMetricsCard } from "@/components/features/evm-metrics-card";
 import { SpendRecordsTable } from "@/components/features/spend-records-table";
 import { DocumentPanel } from "@/components/features/document-panel";
 import type { ProjectDocument } from "@/lib/types";
+import { WorkstreamPanel } from "@/components/features/workstream-panel";
+import { KanbanBoard } from "@/components/features/kanban-board";
+import { SpendRecordsPanel } from "@/components/features/spend-records-panel";
+import { ApprovalQueuePanel } from "@/components/features/approval-queue-panel";
+import { AuditLogViewer } from "@/components/features/audit-log-viewer";
+import { JiraSyncMock } from "@/components/features/jira-sync-mock";
+import { AiInsightsMock } from "@/components/features/ai-insights-mock";
+import { OracleActualsMock } from "@/components/features/oracle-actuals-mock";
 
 const TAB_ITEMS = [
   { value: "overview", label: "Overview" },
   { value: "schedule", label: "Schedule" },
+  { value: "kanban", label: "Kanban" },
   { value: "financials", label: "Financials" },
+  { value: "spend", label: "Spend" },
   { value: "resources", label: "Resources" },
   { value: "risks", label: "Risks" },
   { value: "governance", label: "Governance" },
   { value: "documents", label: "Documents" },
+  { value: "permissions", label: "Permissions" },
 ] as const;
 
 function ProjectDetailContent() {
@@ -133,12 +144,18 @@ function ProjectDetailContent() {
               <RiskRegister entityType="project" entityId={project.id} compact />
             </div>
           </div>
+          <AiInsightsMock />
         </TabsContent>
 
         <TabsContent value="schedule" className="space-y-6">
           <div className="border rounded-lg p-4">
             <SvarGanttPanel projects={[project]} />
           </div>
+        </TabsContent>
+
+        <TabsContent value="kanban" className="space-y-6">
+          <WorkstreamPanel projectId={projectId} />
+          <KanbanBoard projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="financials" className="space-y-6">
@@ -175,6 +192,11 @@ function ProjectDetailContent() {
           </div>
         </TabsContent>
 
+        <TabsContent value="spend" className="space-y-6">
+          <SpendRecordsPanel projectId={projectId} />
+          <OracleActualsMock projectId={projectId} />
+        </TabsContent>
+
         <TabsContent value="resources" className="space-y-6">
           <ProjectResourceAllocationManager
             project={project}
@@ -197,6 +219,8 @@ function ProjectDetailContent() {
           <div className="border rounded-lg p-4">
             <WorkflowPanel entityType="project" entityId={project.id} />
           </div>
+          <ApprovalQueuePanel entityType="project" entityId={projectId} />
+          <JiraSyncMock projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-6">
@@ -209,7 +233,15 @@ function ProjectDetailContent() {
             />
           </div>
         </TabsContent>
+
+        <TabsContent value="permissions" className="space-y-6">
+          <div className="border rounded-lg p-4">
+            <p className="text-sm text-muted-foreground">Project permissions — coming soon</p>
+          </div>
+        </TabsContent>
       </Tabs>
+
+      <AuditLogViewer entityType="project" entityId={projectId} />
 
       {!navigating && project && (
         <ProjectEditDialog

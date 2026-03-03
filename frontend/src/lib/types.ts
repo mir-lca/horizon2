@@ -88,6 +88,9 @@ export interface Project extends CosmosDocument {
   spendRecords?: SpendRecord[];
   costBreakdown?: Record<string, any>;
   documents?: ProjectDocument[];
+  estimateType?: 'rough' | 'budget' | 'definitive' | 'detailed';
+  governanceStageId?: string;
+  activationStatus?: 'draft' | 'pending-approval' | 'active';
   createdAt: string;
   updatedAt: string;
   type: "project";
@@ -399,6 +402,8 @@ export interface CapitalAsset {
   projectId?: string;
   value?: number;
   depreciationSchedule?: Record<string, any>;
+  depreciationYears?: number;
+  depreciationMethod?: 'straight-line' | 'declining-balance';
   location?: string;
   status?: string;
   owner?: string;
@@ -450,4 +455,191 @@ export interface SpendRecord {
   poNumber?: string;
   status?: string;
   realizationDate?: string;
+}
+
+// PPM extended types — module B onwards
+
+export interface Workstream {
+  id: string;
+  projectId: string;
+  name: string;
+  description?: string;
+  status: string;
+  sortOrder: number;
+  createdAt: string;
+}
+
+export type KanbanStatus = 'backlog' | 'todo' | 'in-progress' | 'review' | 'done';
+export type KanbanPriority = 'low' | 'medium' | 'high' | 'critical';
+
+export interface KanbanTask {
+  id: string;
+  projectId: string;
+  workstreamId?: string;
+  title: string;
+  description?: string;
+  status: KanbanStatus;
+  priority: KanbanPriority;
+  storyPoints?: number;
+  assignee?: string;
+  dueDate?: string;
+  sortOrder: number;
+  createdAt: string;
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  category?: string;
+  description?: string;
+}
+
+export interface ResourceSkill {
+  id: string;
+  resourceId: string;
+  skillId: string;
+  level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  projectId?: string;
+  validFrom?: string;
+  validTo?: string;
+  skillName?: string;
+  skillCategory?: string;
+}
+
+export interface LabourRate {
+  id: string;
+  region: string;
+  seniorityLevel: string;
+  roleCategory?: string;
+  ratePerHour: number;
+  currency: string;
+  effectiveDate: string;
+}
+
+export interface SpendRecordFull {
+  id: string;
+  projectId: string;
+  amount: number;
+  category: 'labor' | 'nre' | 'capital';
+  subcategory?: string;
+  description?: string;
+  recordDate: string;
+  poNumber?: string;
+  soNumber?: string;
+  vendor?: string;
+  isActual: boolean;
+  createdAt: string;
+}
+
+export interface CapitalAssetItem {
+  id: string;
+  assetId: string;
+  name: string;
+  quantity: number;
+  unitCost?: number;
+  acquiredDate?: string;
+  serialNumber?: string;
+}
+
+export interface EquipmentLoan {
+  id: string;
+  assetId: string;
+  loanedTo: string;
+  loanedAt: string;
+  returnBy?: string;
+  returnedAt?: string;
+  notes?: string;
+}
+
+export interface GovernanceStage {
+  id: string;
+  name: string;
+  sortOrder: number;
+  description?: string;
+  criteria?: string;
+  requiresApproval: boolean;
+}
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'withdrawn';
+
+export interface ApprovalRequest {
+  id: string;
+  entityType: string;
+  entityId: string;
+  requestType: string;
+  stageId?: string;
+  requestedBy: string;
+  approver?: string;
+  status: ApprovalStatus;
+  requestNotes?: string;
+  decisionNotes?: string;
+  requestedAt: string;
+  decidedAt?: string;
+  entityName?: string;
+}
+
+export interface Notification {
+  id: string;
+  userEmail: string;
+  title: string;
+  message: string;
+  entityType?: string;
+  entityId?: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface CustomCalendar {
+  id: string;
+  name: string;
+  year: number;
+  blackoutDates: { date: string; reason: string; scope?: string }[];
+  createdBy?: string;
+  createdAt: string;
+}
+
+export interface PmGuideline {
+  id: string;
+  title: string;
+  content: string;
+  category?: string;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserRole {
+  id: string;
+  userEmail: string;
+  displayName?: string;
+  role: 'admin' | 'pm' | 'viewer';
+  createdAt: string;
+}
+
+export interface ProjectPermission {
+  id: string;
+  projectId: string;
+  userEmail: string;
+  permissionLevel: 'owner' | 'editor' | 'viewer' | 'none';
+}
+
+export interface HeadcountTarget {
+  id: string;
+  businessUnitId: string;
+  competenceId?: string;
+  roleCategory?: string;
+  targetFte: number;
+  effectiveQuarter: number;
+  effectiveYear: number;
+  notes?: string;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  entityType: string;
+  entityId: string;
+  action: string;
+  actor: string;
+  payload?: Record<string, unknown>;
+  createdAt: string;
 }
