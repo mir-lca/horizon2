@@ -36,3 +36,4 @@ export { SpendRecordsPanel } from "./spend-records-panel";
 export { ApprovalQueuePanel } from "./approval-queue-panel";
 export { AuditLogViewer } from "./audit-log-viewer";
 export { GovernanceStagePipeline } from "./governance-stage-pipeline";
+export { ProjectStatusChart } from "./project-status-chart";

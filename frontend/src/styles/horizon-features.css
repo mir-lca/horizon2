@@ -1,0 +1,50 @@
+/**
+ * Horizon feature-specific styles
+ * SVAR Gantt dark theme: override Willow CSS variables to match app design tokens
+ */
+
+/* SVAR Gantt: custom theme via CSS variable overrides applied inside .wx-willow-theme */
+.wx-willow-theme {
+  --wx-background: var(--background);
+  --wx-border-color: hsl(var(--border));
+  --wx-color-font: hsl(var(--foreground));
+  --wx-color-secondary: hsl(var(--muted-foreground));
+  --wx-table-header-background: hsl(var(--muted));
+  --wx-bar-border-color: transparent;
+  --wx-gantt-scale-background: hsl(var(--muted));
+  --wx-gantt-scale-color: hsl(var(--muted-foreground));
+  --wx-row-alt-background: transparent;
+  --wx-row-select-background: hsl(var(--primary) / 0.08);
+  --wx-color-primary: hsl(var(--primary));
+}
+
+/* Gantt bar hover effect */
+.wx-willow-theme .wx-gantt-bar {
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wx-willow-theme .wx-gantt-bar:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Custom scrollbar inside Gantt */
+.wx-willow-theme ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.wx-willow-theme ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wx-willow-theme ::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.4);
+  border-radius: 3px;
+}
+
+.wx-willow-theme ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.7);
+}

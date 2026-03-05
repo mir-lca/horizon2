@@ -4,6 +4,7 @@
 
 @import "../styles/design-tokens.css";
 @import "../styles/components.css";
+@import "../styles/horizon-features.css";
 
 @layer base {
   :root {
